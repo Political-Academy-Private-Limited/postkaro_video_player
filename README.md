@@ -7,6 +7,10 @@ automatic lifecycle handling, route awareness, visibility-based playback
 control, and optimized support for vertical reel-style feeds like
 Instagram or TikTok.
 
+
+https://github.com/user-attachments/assets/f1f8e44a-3425-4870-aa0e-35beab325ad8
+
+
 ------------------------------------------------------------------------
 
 ## ✨ Features
