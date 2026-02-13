@@ -1,39 +1,150 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# jar_video_player
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
+A modern, reels-ready, customizable network video player for Flutter.
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
+`jar_video_player` is built for real-world performance. It provides
+automatic lifecycle handling, route awareness, visibility-based playback
+control, and optimized support for vertical reel-style feeds like
+Instagram or TikTok.
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+------------------------------------------------------------------------
 
-## Features
+## ✨ Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+-   🎥 Network video playback
+-   🔁 Reels mode (auto play/pause based on visibility)
+-   🔄 Route-aware auto pause
+-   📱 App lifecycle handling (background/foreground safety)
+-   🎛 External controller support
+-   ⚡ Optimized for `PageView` reels
+-   🧠 Safe async initialization (prevents ghost audio issues)
+-   🧹 Proper resource disposal to prevent memory leaks
 
-## Getting started
+------------------------------------------------------------------------
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+## 📦 Installation
 
-## Usage
+Add the dependency to your `pubspec.yaml`:
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
-
-```dart
-const like = 'sample';
+``` yaml
+dependencies:
+  jar_video_player: ^0.1.0
 ```
 
-## Additional information
+Then run:
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+``` bash
+flutter pub get
+```
+
+------------------------------------------------------------------------
+
+## 🚀 Basic Usage
+
+``` dart
+import 'package:flutter/material.dart';
+import 'package:jar_video_player/jar_video_player.dart';
+
+final controller = JarVideoPlayerController();
+
+JarVideoPlayer(
+  controller: controller,
+  url: "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4",
+  autoPlay: true,
+  loop: true,
+);
+```
+
+------------------------------------------------------------------------
+
+## 🎬 Reels Mode
+
+Reels mode automatically plays the video when it becomes visible and
+pauses it when it goes out of view.
+
+``` dart
+JarVideoPlayer(
+  controller: controller,
+  url: videoUrl,
+  reelsMode: true,
+);
+```
+
+### Recommended Usage with PageView
+
+``` dart
+PageView.builder(
+  scrollDirection: Axis.vertical,
+  itemCount: videoList.length,
+  itemBuilder: (context, index) {
+    final controller = JarVideoPlayerController();
+
+    return JarVideoPlayer(
+      controller: controller,
+      url: videoList[index],
+      reelsMode: true,
+    );
+  },
+);
+```
+
+------------------------------------------------------------------------
+
+## 🎛 Controller API
+
+You can control playback manually using the controller:
+
+``` dart
+controller.play();
+controller.pause();
+controller.seekTo(Duration(seconds: 10));
+controller.dispose();
+```
+
+------------------------------------------------------------------------
+
+## 🔄 Lifecycle & Route Handling
+
+`jar_video_player` automatically:
+
+-   Pauses when navigating to a new route
+-   Pauses when app goes to background
+-   Resumes safely when returning
+-   Prevents audio leaks during fast scroll
+
+------------------------------------------------------------------------
+
+## 🧩 Best Practices
+
+-   Dispose controllers properly when no longer needed.
+-   Use `reelsMode: true` inside `PageView` for best performance.
+-   Avoid initializing multiple heavy videos simultaneously on low-end
+    devices.
+
+------------------------------------------------------------------------
+
+## 📚 Example
+
+A complete working example is available inside the `example/` folder of
+this package.
+
+------------------------------------------------------------------------
+
+## 🛠 Requirements
+
+-   Flutter 3.10+
+-   Dart \>=3.0.0 \<4.0.0
+
+------------------------------------------------------------------------
+
+## 📝 License
+
+MIT License
+
+Copyright (c) 2025 Sagar Bisht
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software.
