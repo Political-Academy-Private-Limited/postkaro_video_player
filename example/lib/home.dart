@@ -16,19 +16,23 @@ class _HomeState extends State<Home> {
 
   late List<bool> isVideoPage;
 
+  final List<String> videoUrls = [
+    "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4",
+    "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+  ];
+
   @override
   void initState() {
     super.initState();
 
-    // Generate 10 random pages (true = video, false = image)
-    isVideoPage = List.generate(10, (_) => _random.nextBool());
+    /// Generate 10 random pages (true = video, false = image)
+    isVideoPage = List.generate(20, (_) => _random.nextBool());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-
       appBar: AppBar(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -42,10 +46,9 @@ class _HomeState extends State<Home> {
         controller: _pageController,
         scrollDirection: Axis.vertical,
         itemCount: isVideoPage.length,
-        onPageChanged: (value) {},
         itemBuilder: (context, index) {
           if (isVideoPage[index]) {
-            return _buildVideoPage();
+            return _buildVideoPage(index);
           } else {
             return _buildImagePage();
           }
@@ -70,13 +73,11 @@ class _HomeState extends State<Home> {
                   ),
                 ),
               ),
-
               ListTile(
                 leading: const Icon(Icons.next_plan_outlined),
                 title: const Text("Go to Test Page"),
                 onTap: () {
                   Navigator.pop(context);
-
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const TestClass()),
@@ -90,17 +91,16 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildVideoPage() {
+  Widget _buildVideoPage(int index) {
     final ctrl = JarVideoPlayerController();
+    final videoUrl = videoUrls[index % videoUrls.length];
+
     return JarVideoPlayer(
-      url:
-          "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4",
-      // only works manually only and only  if reelsMode is set to false (default is false),
+      url: videoUrl,
       autoPlay: false,
       loop: false,
       controller: ctrl,
       reelsMode: true,
-      // routeObserver: routeObserver,
     );
   }
 

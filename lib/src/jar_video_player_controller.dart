@@ -1,6 +1,7 @@
 import 'package:video_player/video_player.dart';
 
 class JarVideoPlayerController {
+  ///this is the Video Controller.
   VideoPlayerController? _videoController;
 
   VideoPlayerController? get videoController => _videoController;
@@ -28,15 +29,20 @@ class JarVideoPlayerController {
     }
   }
 
+  ///for playing the video
   Future<void> play() async {
     if (_videoController == null) return;
     await _videoController!.play();
   }
 
+  ///for pausing the video
+
   Future<void> pause() async {
     if (_videoController == null) return;
     await _videoController!.pause();
   }
+
+  ///for seeking to custom duration or position in the video
 
   Future<void> seekTo(Duration position) async {
     if (_videoController == null) return;

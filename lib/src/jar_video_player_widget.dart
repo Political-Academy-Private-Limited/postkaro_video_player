@@ -1,21 +1,52 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'jar_video_player_controller.dart';
 
+/// A customizable video player widget for playing network videos.
+///
+/// Supports reels-style auto play/pause, looping, and manual control.
+///
+/// Requires a [JarVideoPlayerController] to control playback.
+
 class JarVideoPlayer extends StatefulWidget {
-  final JarVideoPlayerController controller;
-  final String url;
-  final bool autoPlay;
-  final bool loop;
+  /// This is for pausing and playing the video if routes changes!!!
   final RouteObserver<ModalRoute>? routeObserver;
+
+  /// Network video URL to play.
+  final String url;
+
+  /// Controller used to control playback (play, pause, etc).
+  final JarVideoPlayerController? controller;
+
+  /// Whether video should auto play when initialized.
+  ///
+  /// Defaults to false.
+  final bool autoPlay;
+
+  /// Whether the video should loop after completion.
+  ///
+  /// Defaults to false.
+  final bool loop;
+
+  /// Enables reels-style behavior.
+  ///
+  /// When true, video auto plays and pauses based on visibility.
   final bool reelsMode;
+
+  /// Creates a [JarVideoPlayer].
+  ///
+  /// The [url] parameter is required and must be a valid network video URL.
+  ///
+  /// The [controller] is optional to control playback.
+  ///
+  /// If [reelsMode] is true, the video automatically plays
+  /// when visible and pauses when not visible.
+  ///
 
   const JarVideoPlayer({
     super.key,
-    required this.controller,
+    this.controller,
     required this.url,
     this.autoPlay = false,
     this.loop = false,
@@ -39,20 +70,18 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    _controller = widget.controller;
+    _controller = widget.controller ?? JarVideoPlayerController();
     _init();
   }
 
   Future<void> _init() async {
     final currentToken = ++_initToken;
-    log("here");
     await _controller.initialize(
       widget.url,
       loop: widget.reelsMode ? true : widget.loop,
     );
 
-    log("here 1");
-    // If widget was disposed or another init started, ignore
+    /// If widget was disposed or another init started, ignore
     if (!mounted || _disposed || currentToken != _initToken) {
       await _controller.disposeVideo();
       return;
@@ -72,9 +101,9 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
     });
   }
 
-  // ---------------------------
-  // Route Handling
-  // ---------------------------
+  /// ---------------------------
+  /// Route Handling
+  /// ---------------------------
 
   @override
   void didChangeDependencies() {
@@ -92,8 +121,12 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
   void dispose() {
     _disposed = true;
 
-    _controller.pause(); // 🔥 stop audio immediately
-    _controller.disposeVideo(); // free decoder
+    _controller.pause();
+
+    /// 🔥 stop audio immediately
+    _controller.disposeVideo();
+
+    /// free decoder
 
     if (widget.routeObserver != null) {
       widget.routeObserver!.unsubscribe(this);
@@ -115,9 +148,9 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
     }
   }
 
-  // ---------------------------
-  // App Lifecycle
-  // ---------------------------
+  /// ---------------------------
+  ///App Lifecycle
+  ///---------------------------
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -129,9 +162,9 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
     }
   }
 
-  // ---------------------------
-  // Visibility (Reels Mode)
-  // ---------------------------
+  ///---------------------------
+  ///Visibility (Reels Mode)
+  ///---------------------------
 
   Future<void> _handleVisibility(double visibleFraction) async {
     if (!widget.reelsMode || _disposed) return;
@@ -149,13 +182,15 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
         _controller.play();
       }
     } else {
-      await _controller.pause(); // 🔥 pause immediately
+      await _controller.pause();
+
+      ///🔥 pause immediately
     }
   }
 
-  // ---------------------------
-  // Safe Play / Pause
-  // ---------------------------
+  ///---------------------------
+  ///Safe Play / Pause
+  ///---------------------------
 
   void _safePlay() {
     if (!_controller.isInitialized) return;
@@ -183,9 +218,9 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
     setState(() {});
   }
 
-  // ---------------------------
-  // UI
-  // ---------------------------
+  ///---------------------------
+  ///UI
+  ///---------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -212,7 +247,6 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
                 child: video,
               )
             : video,
-
         if (!widget.reelsMode)
           GestureDetector(
             onTap: _togglePlayPause,

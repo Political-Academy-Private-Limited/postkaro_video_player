@@ -18,13 +18,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorObservers: [routeObserver],
-      home: Home(),
-    );
+    return MaterialApp(navigatorObservers: [routeObserver], home: Home());
   }
 }
-
