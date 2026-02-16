@@ -76,7 +76,8 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
 
   Future<void> _init() async {
     final currentToken = ++_initToken;
-    await _controller.initialize(
+    await _controller
+        .initialize(
       widget.url,
       loop: widget.reelsMode ? true : widget.loop,
     );
