@@ -5,17 +5,69 @@ import 'package:media_store_plus/media_store_plus.dart';
 import '../jar_video_player.dart';
 
 class JarVideoPlayerOverlay extends StatefulWidget {
+  /// The network URL of the video to be played.
+  ///
+  /// This must be a valid video URL (e.g. mp4, m3u8).
+  /// The video will be streamed using the underlying video player.
   final String url;
+
+  /// Optional controller to control playback externally.
+  ///
+  /// If provided, you can manually control play, pause,
+  /// mute, seek, and listen to state changes.
+  /// If null, an internal controller will be created.
   final JarVideoPlayerController? controller;
+
+  /// A widget displayed at the bottom of the video.
+  ///
+  /// Commonly used for captions, user info, buttons,
+  /// or branding overlays.
   final Widget? bottomStripe;
+
+  /// A widget displayed at the top of the video.
+  ///
+  /// Useful for showing titles, tags, or additional UI elements.
   final Widget? topStripe;
-  // final Widget? overlayChild;
+
+  /// Callback triggered when the download action is pressed.
+  ///
+  /// You can use this to implement custom download logic.
   final VoidCallback? onDownload;
+
+  /// Callback triggered when the share action is pressed.
+  ///
+  /// Allows integration with share plugins or custom share logic.
   final VoidCallback? onShare;
+
+  /// Distance from the right side for positioning overlay controls.
+  ///
+  /// Useful for adjusting layout in reels-style UI.
   final double right;
+
+  /// Enables reels-style behavior.
+  ///
+  /// When true:
+  /// - Video auto plays when visible
+  /// - Video pauses when out of view
+  /// - Optimized for vertical scrolling feeds
   final bool reelsMode;
+
+  /// Determines whether the video should start playing automatically.
+  ///
+  /// Defaults to true in most reel scenarios.
   final bool autoPlay;
+
+  /// Whether the video should loop after finishing.
+  ///
+  /// If true, the video restarts automatically.
   final bool loop;
+
+  /// The aspect ratio of the video player.
+  ///
+  /// Defaults to 9/16 for reels.
+  /// Example:
+  /// - 16/9 for landscape videos
+  /// - 1.0 for square videos
   final double aspectRatio;
 
   const JarVideoPlayerOverlay({
@@ -42,7 +94,7 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
   final GlobalKey _bottomOverlayKey = GlobalKey();
   final GlobalKey _topOverlayKey = GlobalKey();
   bool _isProcessing = false;
-
+  ///this is for handling download
   Future<void> _handleDownload() async {
     if (_isProcessing) return;
 
@@ -73,7 +125,7 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
       setState(() => _isProcessing = false);
     }
   }
-
+///this is for download and share the video with or without overlay widget
   Future<void> _handleShare() async {
     if (_isProcessing) return;
 
@@ -181,7 +233,9 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
     );
   }
 }
-
+///
+/// this is for custom button of action button
+///
 class _ActionButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;

@@ -173,7 +173,7 @@ Future<String?> mergeVideoWithOverlay(
     //       "\"$outputPath\"";
     // }
     final int videoWidth = resolution['width']!;
-    final int videoHeight = resolution['height']!;
+    // final int videoHeight = resolution['height']!;
 
     String? command;
     String? filterComplex;
