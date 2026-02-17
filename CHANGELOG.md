@@ -1,4 +1,4 @@
-## 0.1.2-beta
+## 0.1.2-beta.1
 
 - Now introducing new widget JarVideoPlayerOverlay
 - In this now can download and share the video with custom overlay's
