@@ -9,6 +9,7 @@ class JarVideoPlayerOverlay extends StatefulWidget {
   final JarVideoPlayerController? controller;
   final Widget? bottomStripe;
   final Widget? topStripe;
+  final Widget? overlayChild;
   final VoidCallback? onDownload;
   final VoidCallback? onShare;
   final double right;
@@ -23,6 +24,7 @@ class JarVideoPlayerOverlay extends StatefulWidget {
     this.controller,
     this.bottomStripe,
     this.onDownload,
+    this.overlayChild,
     this.onShare,
     this.reelsMode = false,
     this.autoPlay = false,
@@ -124,7 +126,7 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
                     reelsMode: widget.reelsMode,
                     autoPlay: widget.autoPlay,
                     loop: widget.loop,
-                    // aspectRatio: ,
+                    // aspectRatio: 9/16,
                   ),
                 ),
               ),

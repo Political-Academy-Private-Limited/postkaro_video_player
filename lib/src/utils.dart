@@ -118,23 +118,82 @@ Future<String?> mergeVideoWithOverlay(
       return null;
     }
 
+    // final int videoWidth = resolution['width']!;
+    // final int videoHeight = resolution['height']!;
+    // String? command;
+    // String? filterComplex;
+    // if (topOverlayPath != null) {
+    //   filterComplex =
+    //       // Scale top overlay
+    //       "[1:v]scale=$videoWidth:-1[top];"
+    //
+    //       // Scale bottom overlay
+    //       "[2:v]scale=$videoWidth:-1[bottom];"
+    //
+    //       // Stack top + video vertically
+    //       "[top][0:v]vstack=inputs=2[v1];"
+    //
+    //       // Overlay bottom at bottom of stacked result
+    //       "[v1][bottom]overlay=0:H-h[v]";
+    //
+    //   command = "-y "
+    //       "-i \"$videoPath\" "
+    //       "-i \"$topOverlayPath\" "
+    //       "-i \"$bottomOverlayPath\" "
+    //       "-filter_complex \"$filterComplex\" "
+    //       "-map \"[v]\" "
+    //       "-map 0:a? "
+    //       "-c:v libx264 "
+    //       "-preset veryfast "
+    //       "-crf 18 "
+    //       "-pix_fmt yuv420p "
+    //       "-movflags +faststart "
+    //       "-c:a copy "
+    //       "-shortest "
+    //       "\"$outputPath\"";
+    // } else {
+    //   /// Scale overlay to video width (maintain aspect ratio)
+    //
+    //   filterComplex = "[1:v]scale=$videoWidth:-1[bottom];"
+    //       "[0:v][bottom]overlay=0:H-h[v]";
+    //
+    //   command = "-y "
+    //       "-i \"$videoPath\" "
+    //       "-i \"$bottomOverlayPath\" "
+    //       "-filter_complex \"$filterComplex\" "
+    //       "-map \"[v]\" "
+    //       "-map 0:a? "
+    //       "-c:v libx264 "
+    //       "-preset veryfast "
+    //       "-crf 18 "
+    //       "-pix_fmt yuv420p "
+    //       "-movflags +faststart "
+    //       "-c:a copy "
+    //       "-shortest "
+    //       "\"$outputPath\"";
+    // }
     final int videoWidth = resolution['width']!;
     final int videoHeight = resolution['height']!;
+
     String? command;
     String? filterComplex;
+
     if (topOverlayPath != null) {
       filterComplex =
-          // Scale top overlay
+          // Scale top overlay to video width
           "[1:v]scale=$videoWidth:-1[top];"
 
-          // Scale bottom overlay
+          // Scale bottom overlay to video width
           "[2:v]scale=$videoWidth:-1[bottom];"
 
-          // Stack top + video vertically
+          // Stack top + original video
           "[top][0:v]vstack=inputs=2[v1];"
 
-          // Overlay bottom at bottom of stacked result
-          "[v1][bottom]overlay=0:H-h[v]";
+          // Overlay bottom at bottom
+          "[v1][bottom]overlay=0:H-h[v2];"
+
+          // 🔥 Force EVEN dimensions (IMPORTANT FIX)
+          "[v2]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
 
       command = "-y "
           "-i \"$videoPath\" "
@@ -152,10 +211,15 @@ Future<String?> mergeVideoWithOverlay(
           "-shortest "
           "\"$outputPath\"";
     } else {
-      /// Scale overlay to video width (maintain aspect ratio)
+      filterComplex =
+          // Scale bottom overlay
+          "[1:v]scale=$videoWidth:-1[bottom];"
 
-      filterComplex = "[1:v]scale=$videoWidth:-1[bottom];"
-          "[0:v][bottom]overlay=0:H-h[v]";
+          // Overlay on video
+          "[0:v][bottom]overlay=0:H-h[v1];"
+
+          // 🔥 Force EVEN dimensions
+          "[v1]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
 
       command = "-y "
           "-i \"$videoPath\" "
@@ -171,27 +235,9 @@ Future<String?> mergeVideoWithOverlay(
           "-c:a copy "
           "-shortest "
           "\"$outputPath\"";
-
-      // filterComplex = "[1:v]scale=$videoWidth:-1:flags=lanczos[overlay];"
-      //     "[0:v][overlay]overlay=0:$videoHeight-h[v]";
-      //
-      // command = "-y "
-      //     "-i \"$videoPath\" "
-      //     "-i \"$bottomOverlayPath\" "
-      //     "-filter_complex \"$filterComplex\" "
-      //     "-map \"[v]\" "
-      //     "-map 0:a? "
-      //     "-c:v libx264 "
-      //     "-preset veryfast "
-      //     "-crf 18 "
-      //     "-pix_fmt yuv420p "
-      //     "-movflags +faststart "
-      //     "-c:a copy "
-      //     "-shortest "
-      //     "\"$outputPath\"";
     }
 
-    final session = await FFmpegKit.execute(command!);
+    final session = await FFmpegKit.execute(command);
     final returnCode = await session.getReturnCode();
 
     if (ReturnCode.isSuccess(returnCode)) {
