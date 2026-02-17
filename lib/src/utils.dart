@@ -243,10 +243,6 @@ Future<String?> mergeVideoWithOverlay(
     if (ReturnCode.isSuccess(returnCode)) {
       return File(outputPath).existsSync() ? outputPath : null;
     } else {
-      final logs = await session.getAllLogs();
-      for (var log in logs) {
-        print(log.getMessage());
-      }
       return null;
     }
   } catch (e) {
