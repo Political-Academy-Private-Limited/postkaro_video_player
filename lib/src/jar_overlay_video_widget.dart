@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jar_video_player/src/utils.dart';
-import 'package:jar_video_player/src/video_export_service.dart';
+import 'package:jar_video_player/helper/animation_widget.dart';
+import 'package:jar_video_player/helper/utils.dart';
+import 'package:jar_video_player/helper/video_export_service.dart';
 import 'package:media_store_plus/media_store_plus.dart';
 import '../jar_video_player.dart';
 
@@ -70,6 +71,25 @@ class JarVideoPlayerOverlay extends StatefulWidget {
   /// - 1.0 for square videos
   final double aspectRatio;
 
+  ///for download and share buttons
+  ///all are optional
+  final Icon? downloadIcon;
+  final Icon? shareIcon;
+
+  ///default background color is Colors.black54
+  final Color? downloadBackgroundColor;
+
+  ///share background is not necessary as it can user download background color
+  final Color? shareBackgroundColor;
+
+  ///
+  ///for downloading in animated style
+  ///
+  final Widget? animatedOverlay;
+
+  ///
+  final OverlayAnimationType? animationType;
+
   const JarVideoPlayerOverlay({
     super.key,
     required this.url,
@@ -84,6 +104,12 @@ class JarVideoPlayerOverlay extends StatefulWidget {
     this.right = 12,
     this.topStripe,
     this.aspectRatio = 9 / 16,
+    this.downloadIcon,
+    this.shareIcon,
+    this.downloadBackgroundColor,
+    this.shareBackgroundColor,
+    this.animatedOverlay,
+    this.animationType,
   });
 
   @override
@@ -93,7 +119,10 @@ class JarVideoPlayerOverlay extends StatefulWidget {
 class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
   final GlobalKey _bottomOverlayKey = GlobalKey();
   final GlobalKey _topOverlayKey = GlobalKey();
+  final GlobalKey _animatedOverlayKey = GlobalKey();
+
   bool _isProcessing = false;
+
   ///this is for handling download
   Future<void> _handleDownload() async {
     if (_isProcessing) return;
@@ -102,10 +131,13 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
 
     try {
       final path = await exportVideoWithOverlay(
-          videoUrl: widget.url,
-          bottomOverlayKey: _bottomOverlayKey,
-          downloadWithOverlay: widget.bottomStripe != null,
-          topOverlayKey: widget.topStripe == null ? null : _topOverlayKey);
+        videoUrl: widget.url,
+        bottomOverlayKey: _bottomOverlayKey,
+        downloadWithOverlay: widget.bottomStripe != null,
+        topOverlayKey: widget.topStripe == null ? null : _topOverlayKey,
+        animatedOverlayKey:
+            widget.animatedOverlay == null ? null : _animatedOverlayKey,
+      );
 
       if (path != null) {
         await MediaStore.ensureInitialized();
@@ -120,12 +152,12 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
     } catch (e) {
       throw e.toString();
     }
-
     if (mounted) {
       setState(() => _isProcessing = false);
     }
   }
-///this is for download and share the video with or without overlay widget
+
+  ///this is for download and share the video with or without overlay widget
   Future<void> _handleShare() async {
     if (_isProcessing) return;
 
@@ -133,10 +165,13 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
 
     try {
       final path = await exportVideoWithOverlay(
-          videoUrl: widget.url,
-          bottomOverlayKey: _bottomOverlayKey,
-          downloadWithOverlay: widget.bottomStripe != null,
-          topOverlayKey: widget.topStripe == null ? null : _topOverlayKey);
+        videoUrl: widget.url,
+        bottomOverlayKey: _bottomOverlayKey,
+        downloadWithOverlay: widget.bottomStripe != null,
+        topOverlayKey: widget.topStripe == null ? null : _topOverlayKey,
+        animatedOverlayKey:
+            widget.animatedOverlay == null ? null : _animatedOverlayKey,
+      );
 
       if (path != null) {
         await shareVideo(path);
@@ -166,7 +201,7 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
         Expanded(
           child: Stack(
             children: [
-              /// Video / Image (Full Screen Cover)
+              /// Video  (Full Screen Cover)
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
@@ -192,6 +227,15 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
                     child: widget.bottomStripe!,
                   ),
                 ),
+              if (widget.animatedOverlay != null)
+                RepaintBoundary(
+                  key: _animatedOverlayKey,
+                  child: AnimationWidget(
+                    animatedOverlay: widget.animatedOverlay!,
+                    animationType: widget.animationType ??
+                        OverlayAnimationType.topToCenter,
+                  ),
+                ),
 
               /// Buttons (center right)
               Positioned(
@@ -203,15 +247,28 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _ActionButton(
-                        icon: Icons.download,
+                        icon: widget.downloadIcon ??
+                            Icon(
+                              Icons.download,
+                              color: Colors.white,
+                              size: 26,
+                            ),
                         onTap: _handleDownload,
                         disabled: _isProcessing,
+                        backgroundColor: widget.downloadBackgroundColor,
                       ),
                       const SizedBox(height: 16),
                       _ActionButton(
-                        icon: Icons.share,
+                        icon: widget.shareIcon ??
+                            Icon(
+                              Icons.share,
+                              color: Colors.white,
+                              size: 26,
+                            ),
                         onTap: _handleShare,
                         disabled: _isProcessing,
+                        backgroundColor: widget.shareBackgroundColor ??
+                            widget.downloadBackgroundColor,
                       ),
                     ],
                   ),
@@ -233,18 +290,21 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
     );
   }
 }
+
 ///
 /// this is for custom button of action button
 ///
 class _ActionButton extends StatelessWidget {
-  final IconData icon;
+  final Icon icon;
   final VoidCallback onTap;
   final bool disabled;
+  final Color? backgroundColor;
 
   const _ActionButton({
     required this.icon,
     required this.onTap,
     this.disabled = false,
+    this.backgroundColor,
   });
 
   @override
@@ -258,12 +318,8 @@ class _ActionButton extends StatelessWidget {
           opacity: disabled ? 0.5 : 1,
           child: CircleAvatar(
             radius: 24,
-            backgroundColor: Colors.black54,
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 26,
-            ),
+            backgroundColor: backgroundColor ?? Colors.black54,
+            child: icon,
           ),
         ),
       ),
