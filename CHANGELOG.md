@@ -1,5 +1,11 @@
 ## 0.1.3-beta.1
 
+- all features of v -> 0.1.3-beta.1
+- Added Animated overlay feature.
+- Added download of video with animated overlay feature with video share also.
+- fixed some bugs of overlay.
+## 0.1.3-beta.1
+
 - Now introducing new widget JarVideoPlayerOverlay
 - In this now can download and share the video with custom overlay's
 - video orientation of normal mode and reel mode is changed
