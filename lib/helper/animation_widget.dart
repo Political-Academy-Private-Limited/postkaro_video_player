@@ -58,15 +58,15 @@ class _AnimationWidgetState extends State<AnimationWidget> {
         _endAlignment = Alignment.centerLeft;
         break;
 
-      case OverlayAnimationType.centerToTopRight:
-        _startAlignment = Alignment.center;
-        _endAlignment = Alignment.topRight;
-        break;
-
-      case OverlayAnimationType.centerToBottomLeft:
-        _startAlignment = Alignment.center;
-        _endAlignment = Alignment.bottomLeft;
-        break;
+      // case OverlayAnimationType.centerToTopRight:
+      //   _startAlignment = Alignment.center;
+      //   _endAlignment = Alignment.topRight;
+      //   break;
+      //
+      // case OverlayAnimationType.centerToBottomLeft:
+      //   _startAlignment = Alignment.center;
+      //   _endAlignment = Alignment.bottomLeft;
+      //   break;
 
       case OverlayAnimationType.diagonalTopLeftToBottomRight:
         _startAlignment = Alignment.topLeft;
@@ -74,8 +74,8 @@ class _AnimationWidgetState extends State<AnimationWidget> {
         break;
 
       case OverlayAnimationType.none:
-        _startAlignment = Alignment.center;
-        _endAlignment = Alignment.center;
+        _startAlignment = Alignment.topLeft;
+        _endAlignment = Alignment.topLeft;
     }
   }
 

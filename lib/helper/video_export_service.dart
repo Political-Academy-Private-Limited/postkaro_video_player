@@ -3,13 +3,14 @@ import 'package:jar_video_player/helper/utils.dart';
 
 import 'overlay_animation_type.dart';
 
-Future<String?> exportVideoWithOverlay(
-    {bool downloadWithOverlay = false,
-    required String videoUrl,
-    required GlobalKey bottomOverlayKey,
-    GlobalKey? topOverlayKey,
-    GlobalKey? animatedOverlayKey,
-    OverlayAnimationType? animationType}) async {
+Future<String?> exportVideoWithOverlay({
+  bool downloadWithOverlay = false,
+  required String videoUrl,
+  required GlobalKey bottomOverlayKey,
+  GlobalKey? topOverlayKey,
+  GlobalKey? animatedOverlayKey,
+  OverlayAnimationType? animationType,
+}) async {
   try {
     /// 1️⃣ Download original video
     final videoPath = await downloadVideo(videoUrl);
@@ -36,7 +37,7 @@ Future<String?> exportVideoWithOverlay(
         final finalVideo = await mergeVideoWithOverlay(videoPath, overlayPath!,
             topOverlayPath: topOverPath,
             animatedOverlayPath: animatedOverlayPath,
-            animationType: animationType ?? OverlayAnimationType.topToCenter);
+            animationType: animationType ?? OverlayAnimationType.none);
         return finalVideo;
       }
     } else {
@@ -44,7 +45,7 @@ Future<String?> exportVideoWithOverlay(
       if (videoPath != null) {
         final finalVideo = await mergeVideoWithOverlay(videoPath, overlayPath!,
             animatedOverlayPath: animatedOverlayPath,
-            animationType: animationType ?? OverlayAnimationType.topToCenter);
+            animationType: animationType ?? OverlayAnimationType.none);
         return finalVideo;
       }
     }

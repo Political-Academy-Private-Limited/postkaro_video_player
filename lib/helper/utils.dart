@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -103,101 +104,6 @@ Future<Map<String, int>?> getVideoResolution(String path) async {
 /// MERGE VIDEO + OVERLAY (Optimal)
 /// ===============================
 
-// Future<String?> mergeVideoWithOverlay(
-//   String videoPath,
-//   String bottomOverlayPath, {
-//   String? topOverlayPath,
-// }) async {
-//   try {
-//     final dir = await getTemporaryDirectory();
-//     final outputPath =
-//         "${dir.path}/final_${DateTime.now().millisecondsSinceEpoch}.mp4";
-//
-//     final resolution = await getVideoResolution(videoPath);
-//
-//     if (resolution == null) {
-//       log("Could not detect video resolution");
-//       return null;
-//     }
-//
-//     final int videoWidth = resolution['width']!;
-//     // final int videoHeight = resolution['height']!;
-//
-//     String? command;
-//     String? filterComplex;
-//
-//     if (topOverlayPath != null) {
-//       filterComplex =
-//           // Scale top overlay to video width
-//           "[1:v]scale=$videoWidth:-1[top];"
-//
-//           // Scale bottom overlay to video width
-//           "[2:v]scale=$videoWidth:-1[bottom];"
-//
-//           // Stack top + original video
-//           "[top][0:v]vstack=inputs=2[v1];"
-//
-//           // Overlay bottom at bottom
-//           "[v1][bottom]overlay=0:H-h[v2];"
-//
-//           // 🔥 Force EVEN dimensions (IMPORTANT FIX)
-//           "[v2]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
-//
-//       command = "-y "
-//           "-i \"$videoPath\" "
-//           "-i \"$topOverlayPath\" "
-//           "-i \"$bottomOverlayPath\" "
-//           "-filter_complex \"$filterComplex\" "
-//           "-map \"[v]\" "
-//           "-map 0:a? "
-//           "-c:v libx264 "
-//           "-preset veryfast "
-//           "-crf 18 "
-//           "-pix_fmt yuv420p "
-//           "-movflags +faststart "
-//           "-c:a copy "
-//           "-shortest "
-//           "\"$outputPath\"";
-//     } else {
-//       filterComplex =
-//           // Scale bottom overlay
-//           "[1:v]scale=$videoWidth:-1[bottom];"
-//
-//           // Overlay on video
-//           "[0:v][bottom]overlay=0:H-h[v1];"
-//
-//           // 🔥 Force EVEN dimensions
-//           "[v1]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
-//
-//       command = "-y "
-//           "-i \"$videoPath\" "
-//           "-i \"$bottomOverlayPath\" "
-//           "-filter_complex \"$filterComplex\" "
-//           "-map \"[v]\" "
-//           "-map 0:a? "
-//           "-c:v libx264 "
-//           "-preset veryfast "
-//           "-crf 18 "
-//           "-pix_fmt yuv420p "
-//           "-movflags +faststart "
-//           "-c:a copy "
-//           "-shortest "
-//           "\"$outputPath\"";
-//     }
-//
-//     final session = await FFmpegKit.execute(command);
-//     final returnCode = await session.getReturnCode();
-//
-//     if (ReturnCode.isSuccess(returnCode)) {
-//       return File(outputPath).existsSync() ? outputPath : null;
-//     } else {
-//       return null;
-//     }
-//   } catch (e) {
-//     log("Merge error: $e");
-//     return null;
-//   }
-// }
 Future<String?> mergeVideoWithOverlay(
   String videoPath,
   String bottomOverlayPath, {
@@ -205,6 +111,7 @@ Future<String?> mergeVideoWithOverlay(
   String? animatedOverlayPath,
   required OverlayAnimationType animationType,
 }) async {
+  log("animation type ${animationType.name}");
   try {
     final dir = await getTemporaryDirectory();
     final outputPath =
@@ -241,22 +148,27 @@ Future<String?> mergeVideoWithOverlay(
       index++;
     }
 
-    /// ---- STACKING ----
-    if (topOverlayPath != null) {
-      filter += "[top][0:v]vstack=inputs=2[v1];"
-          "[v1][bottom]overlay=0:H-h[v2];";
-    } else {
-      filter += "[0:v][bottom]overlay=0:H-h[v2];";
-    }
+    /// ---- BASE VIDEO ----
+    filter += "[0:v]setpts=PTS-STARTPTS[base];";
 
-    /// ---- ANIMATION ----
+    /// ---- APPLY BOTTOM OVERLAY FIRST ----
+    filter += "[base][bottom]overlay=0:H-h[baseWithBottom];";
+
+    /// ---- ANIMATE ON VIDEO + BOTTOM COMBINED ----
     if (animatedOverlayPath != null) {
       final animationExpr = buildOverlayAnimation(animationType, duration);
 
-      filter += "[v2][anim]overlay=$animationExpr[v3];"
-          "[v3]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
+      filter += "[baseWithBottom][anim]overlay=$animationExpr[animated];";
     } else {
-      filter += "[v2]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
+      filter += "[baseWithBottom]copy[animated];";
+    }
+
+    /// ---- APPLY TOP OVERLAY (IGNORE FOR CENTER CALCULATION) ----
+    if (topOverlayPath != null) {
+      filter += "[top][animated]vstack=inputs=2[stacked];"
+          "[stacked]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
+    } else {
+      filter += "[animated]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
     }
 
     final command = "-y "
@@ -327,33 +239,52 @@ String buildOverlayAnimation(
   OverlayAnimationType type,
   double duration,
 ) {
+  const animTime = 2; // seconds
+
   switch (type) {
     case OverlayAnimationType.topToCenter:
       return "x=(main_w-overlay_w)/2:"
-          "y=if(lt(t\\,2)\\,-overlay_h+t*(main_h/2)\\,(main_h-overlay_h)/2)";
+          "y=if(lt(t\\,$animTime)\\,"
+          "-overlay_h + ((main_h-overlay_h)/2 + overlay_h)*(t/$animTime)\\,"
+          "(main_h-overlay_h)/2)";
 
     case OverlayAnimationType.bottomToCenter:
       return "x=(main_w-overlay_w)/2:"
-          "y=if(lt(t\\,2)\\,main_h-t*(main_h/2)\\,(main_h-overlay_h)/2)";
+          "y=if(lt(t\\,$animTime)\\,"
+          "main_h - (main_h-(main_h-overlay_h)/2)*(t/$animTime)\\,"
+          "(main_h-overlay_h)/2)";
 
     case OverlayAnimationType.leftToRight:
-      return "x=if(lt(t\\,2)\\,-overlay_w+t*(main_w/2)\\,(main_w-overlay_w)/2):"
+      return "x=if(lt(t\\,$animTime)\\,"
+          "-overlay_w + ((main_w-overlay_w)/2 + overlay_w)*(t/$animTime)\\,"
+          "(main_w-overlay_w)/2):"
           "y=(main_h-overlay_h)/2";
 
     case OverlayAnimationType.rightToLeft:
-      return "x=if(lt(t\\,2)\\,main_w-t*(main_w/2)\\,(main_w-overlay_w)/2):"
+      return "x=if(lt(t\\,$animTime)\\,"
+          "main_w - (main_w-(main_w-overlay_w)/2)*(t/$animTime)\\,"
+          "(main_w-overlay_w)/2):"
           "y=(main_h-overlay_h)/2";
 
-    case OverlayAnimationType.centerToTopRight:
-      return "x=if(lt(t\\,2)\\,(main_w-overlay_w)/2 + t*(main_w/2)\\,main_w-overlay_w):"
-          "y=if(lt(t\\,2)\\,(main_h-overlay_h)/2 - t*(main_h/2)\\,0)";
-
     case OverlayAnimationType.diagonalTopLeftToBottomRight:
-      return "x=if(lt(t\\,2)\\,-overlay_w+t*(main_w/2)\\,(main_w-overlay_w)/2):"
-          "y=if(lt(t\\,2)\\,-overlay_h+t*(main_h/2)\\,(main_h-overlay_h)/2)";
+      return "x=if(lt(t\\,$animTime)\\,"
+          "-overlay_w + ((main_w-overlay_w)/2 + overlay_w)*(t/$animTime)\\,"
+          "(main_w-overlay_w)/2):"
+          "y=if(lt(t\\,$animTime)\\,"
+          "-overlay_h + ((main_h-overlay_h)/2 + overlay_h)*(t/$animTime)\\,"
+          "(main_h-overlay_h)/2)";
+    // case OverlayAnimationType.centerToTopRight:
+    //   return "x=(main_w-overlay_w)/2 + "
+    //       "((main_w-overlay_w)/2) * min(t/$animTime\\,1):"
+    //       "y=(main_h-overlay_h)/2 - "
+    //       "((main_h-overlay_h)/2) * min(t/$animTime\\,1)";
+    // case OverlayAnimationType.centerToBottomLeft:
+    //   return "x=(main_w-overlay_w)/2 - "
+    //       "((main_w-overlay_w)/2) * min(t/$animTime\\,1):"
+    //       "y=(main_h-overlay_h)/2 + "
+    //       "((main_h-overlay_h)/2) * min(t/$animTime\\,1)";
 
     case OverlayAnimationType.none:
-    default:
       return "x=(main_w-overlay_w)/2:"
           "y=(main_h-overlay_h)/2";
   }

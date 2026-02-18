@@ -137,6 +137,7 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
         topOverlayKey: widget.topStripe == null ? null : _topOverlayKey,
         animatedOverlayKey:
             widget.animatedOverlay == null ? null : _animatedOverlayKey,
+        animationType: widget.animationType,
       );
 
       if (path != null) {
@@ -171,6 +172,7 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
         topOverlayKey: widget.topStripe == null ? null : _topOverlayKey,
         animatedOverlayKey:
             widget.animatedOverlay == null ? null : _animatedOverlayKey,
+        animationType: widget.animationType,
       );
 
       if (path != null) {
@@ -232,8 +234,8 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
                   key: _animatedOverlayKey,
                   child: AnimationWidget(
                     animatedOverlay: widget.animatedOverlay!,
-                    animationType: widget.animationType ??
-                        OverlayAnimationType.topToCenter,
+                    animationType:
+                        widget.animationType ?? OverlayAnimationType.none,
                   ),
                 ),
 

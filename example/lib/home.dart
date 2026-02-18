@@ -16,9 +16,15 @@ class _HomeState extends State<Home> {
   late List<bool> isVideoPage;
 
   final List<String> videoUrls = <String>[
-    "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4",
-    "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-
+    // "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4",
+    // "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+    "https://postkarocdn.blr1.digitaloceanspaces.com/Sanatan/post/videos/1771126864922.mp4",
+    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216148375.mp4",
+    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216127404.mp4",
+    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216102250.mp4",
+    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216082997.mp4",
+    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216102250.mp4",
+    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216102250.mp4",
   ];
 
   @override
@@ -118,14 +124,11 @@ class _HomeState extends State<Home> {
         ),
 
         /// these is for animated overlay
-        animatedOverlay: Padding(
-          padding: const EdgeInsets.only(bottom: 70),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              "https://fastly.picsum.photos/id/237/200/300.jpg?hmac=TmmQSbShHz9CdQm0NkEjx1Dyh_Y984R9LpNrpvH2D_U",
-              height: 200,
-            ),
+        animatedOverlay: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.network(
+            "https://fastly.picsum.photos/id/237/200/300.jpg?hmac=TmmQSbShHz9CdQm0NkEjx1Dyh_Y984R9LpNrpvH2D_U",
+            height: 200,
           ),
         ),
         // onDownload: () {},
@@ -133,6 +136,7 @@ class _HomeState extends State<Home> {
 
         ///if you want reel mode, controller is not necessary
         // controller: ctrl,
+        animationType: OverlayAnimationType.bottomToCenter,
       ),
     );
   }
