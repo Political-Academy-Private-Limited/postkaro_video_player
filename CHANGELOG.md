@@ -1,4 +1,4 @@
-## 0.1.3-beta.1
+## 0.1.4
 
 - all features of v -> 0.1.3-beta.1
 - Added Animated overlay feature.
