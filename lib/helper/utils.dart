@@ -241,7 +241,7 @@ String buildOverlayAnimation(
   OverlayAnimationType type,
   double duration,
 ) {
-  const animTime = 2; // seconds
+  const animTime = 2;
 
   switch (type) {
     case OverlayAnimationType.topToCenter:
