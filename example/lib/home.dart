@@ -134,7 +134,7 @@ class _HomeState extends State<Home> {
 
         ///if you want reel mode, controller is not necessary
         // controller: ctrl,
-        animationType: OverlayAnimationType.diagonalBottomRightToTopLeft,
+        animationType: OverlayAnimationType.diagonalTopRightToBottomLeft,
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:jar_video_player/helper/animation_widget.dart';
 import 'package:jar_video_player/helper/utils.dart';
@@ -104,8 +106,11 @@ class JarVideoPlayerOverlay extends StatefulWidget {
   final Widget? shareDownloadProgressIndicator;
 
   ///download with custom overlays
-  ///
   final bool downloadWithOverlay;
+
+  ////
+  final void Function(bool, double)? onStatusChanged;
+
   const JarVideoPlayerOverlay({
     super.key,
     required this.url,
@@ -128,6 +133,7 @@ class JarVideoPlayerOverlay extends StatefulWidget {
     this.animationType,
     this.shareDownloadProgressIndicator,
     this.downloadWithOverlay = false,
+    this.onStatusChanged,
   });
 
   @override
@@ -140,6 +146,8 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
   final GlobalKey _animatedOverlayKey = GlobalKey();
 
   bool _isProcessing = false;
+  bool isVideoLoading = false;
+  double videoProgress = 0;
 
   ///this is for handling download
   Future<void> _handleDownload() async {
@@ -233,6 +241,14 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
                     reelsMode: widget.reelsMode,
                     autoPlay: widget.autoPlay,
                     loop: widget.loop,
+                    onStatusChanged: (isLoading, progress) {
+                      log(isLoading.toString());
+                      setState(() {
+                        isVideoLoading = isLoading;
+                        videoProgress = progress;
+                        widget.onStatusChanged?.call(false, 0);
+                      });
+                    },
                     // aspectRatio: 9/16,
                   ),
                 ),
@@ -247,7 +263,7 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
                     child: widget.bottomStripe!,
                   ),
                 ),
-              if (widget.animatedOverlay != null)
+              if (widget.animatedOverlay != null && !isVideoLoading)
                 RepaintBoundary(
                   key: _animatedOverlayKey,
                   child: AnimationWidget(

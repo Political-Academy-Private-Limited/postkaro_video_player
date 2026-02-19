@@ -1,7 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import '../helper/jar_video_player_controller.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'dart:io';
 
 /// A customizable video player widget for playing network videos.
 ///
@@ -46,6 +50,10 @@ class JarVideoPlayer extends StatefulWidget {
   ///
   /// If [reelsMode] is true, the video automatically plays
   /// when visible and pauses when not visible.
+
+  /// for now only isLoading is working, progress wil be implemented in future
+  final void Function(bool isLoading, double progress)? onStatusChanged;
+
   ///
 
   const JarVideoPlayer({
@@ -57,6 +65,7 @@ class JarVideoPlayer extends StatefulWidget {
     this.routeObserver,
     this.reelsMode = false,
     this.aspectRatio,
+    this.onStatusChanged,
   });
   @override
   State<JarVideoPlayer> createState() => _JarVideoPlayerState();
@@ -81,29 +90,46 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
 
   Future<void> _init() async {
     final currentToken = ++_initToken;
-    await _controller.initialize(
-      widget.url,
-      loop: widget.reelsMode ? true : widget.loop,
-    );
 
-    /// If widget was disposed or another init started, ignore
-    if (!mounted || _disposed || currentToken != _initToken) {
-      await _controller.disposeVideo();
-      return;
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onStatusChanged?.call(true, 1.0);
+    });
+    try {
+      /// Download & cache video first
+      final File file = await DefaultCacheManager().getSingleFile(widget.url);
 
-    if (widget.reelsMode) {
-      // Only play if visible
-      if (_isVisible) {
+      /// Pass local file path instead of network URL
+      await _controller.initialize(
+        file.path,
+        loop: widget.reelsMode ? true : widget.loop,
+      );
+
+      /// If widget was disposed or another init started, ignore
+      if (!mounted || _disposed || currentToken != _initToken) {
+        await _controller.disposeVideo();
+        return;
+      }
+
+      if (widget.reelsMode) {
+        if (_isVisible) {
+          _controller.play();
+        }
+      } else if (widget.autoPlay) {
         _controller.play();
       }
-    } else if (widget.autoPlay) {
-      _controller.play();
-    }
 
-    setState(() {
-      _loading = false;
-    });
+      setState(() {
+        _loading = false;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onStatusChanged?.call(false, 1.0);
+      });
+    } catch (e) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onStatusChanged?.call(false, 1.0);
+      });
+      rethrow;
+    }
   }
 
   /// ---------------------------
@@ -128,7 +154,7 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
 
     _controller.pause();
 
-    /// 🔥 stop audio immediately
+    ///  stop audio immediately
     _controller.disposeVideo();
 
     /// free decoder
@@ -198,7 +224,7 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
     } else {
       await _controller.pause();
 
-      ///🔥 pause immediately
+      /// pause immediately
     }
   }
 
@@ -238,6 +264,7 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
 
   @override
   Widget build(BuildContext context) {
+    log("line 345 $_loading and ${!_controller.isInitialized}");
     if (_loading || !_controller.isInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
