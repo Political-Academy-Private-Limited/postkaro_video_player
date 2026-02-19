@@ -16,8 +16,15 @@ class _HomeState extends State<Home> {
   late List<bool> isVideoPage;
 
   final List<String> videoUrls = <String>[
-    "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4",
-    "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+    // "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4",
+    // "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+    "https://postkarocdn.blr1.digitaloceanspaces.com/Sanatan/post/videos/1771126864922.mp4",
+    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216148375.mp4",
+    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216127404.mp4",
+    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216102250.mp4",
+    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216082997.mp4",
+    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216102250.mp4",
+    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216102250.mp4",
   ];
 
   @override
@@ -118,17 +125,16 @@ class _HomeState extends State<Home> {
         ),
 
         /// these is for animated overlay
-        animatedOverlay: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.network(
-            "https://fastly.picsum.photos/id/237/200/300.jpg?hmac=TmmQSbShHz9CdQm0NkEjx1Dyh_Y984R9LpNrpvH2D_U",
-            height: 200,
-          ),
+        animatedOverlay: BlurNetworkImage(
+          url:
+              "https://as1.ftcdn.net/jpg/16/65/67/54/1000_F_1665675417_kxphTKeghxkmNfhJfx8PqQI2DevEnaG2.webp",
+          curveDepth: 30,
+          height: 120,
         ),
 
         ///if you want reel mode, controller is not necessary
         // controller: ctrl,
-        animationType: OverlayAnimationType.leftToCenter,
+        animationType: OverlayAnimationType.diagonalBottomRightToTopLeft,
       ),
     );
   }

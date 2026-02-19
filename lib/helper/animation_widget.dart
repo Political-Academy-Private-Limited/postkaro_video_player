@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'overlay_animation_type.dart';
 
 class AnimationWidget extends StatefulWidget {
