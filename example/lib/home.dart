@@ -108,6 +108,7 @@ class _HomeState extends State<Home> {
         url: videoUrl,
         aspectRatio: 9 / 16,
         reelsMode: true,
+        downloadWithOverlay: true,
         topStripe: Container(
           color: Colors.green,
           width: double.infinity,
@@ -131,12 +132,10 @@ class _HomeState extends State<Home> {
             height: 200,
           ),
         ),
-        // onDownload: () {},
-        // onShare: () {},
 
         ///if you want reel mode, controller is not necessary
         // controller: ctrl,
-        animationType: OverlayAnimationType.diagonalTopLeftToBottomRight,
+        animationType: OverlayAnimationType.leftToCenter,
       ),
     );
   }

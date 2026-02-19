@@ -34,18 +34,24 @@ Future<String?> exportVideoWithOverlay({
 
       /// 3️⃣ Merge with FFmpeg both top and bottom overlay
       if (videoPath != null) {
-        final finalVideo = await mergeVideoWithOverlay(videoPath, overlayPath!,
-            topOverlayPath: topOverPath,
-            animatedOverlayPath: animatedOverlayPath,
-            animationType: animationType ?? OverlayAnimationType.none);
+        final finalVideo = await mergeVideoWithOverlay(
+          videoPath,
+          overlayPath!,
+          topOverlayPath: topOverPath,
+          animatedOverlayPath: animatedOverlayPath,
+          animationType: animationType ?? OverlayAnimationType.none,
+        );
         return finalVideo;
       }
     } else {
       /// 3️⃣ Merge with FFmpeg
       if (videoPath != null) {
-        final finalVideo = await mergeVideoWithOverlay(videoPath, overlayPath!,
-            animatedOverlayPath: animatedOverlayPath,
-            animationType: animationType ?? OverlayAnimationType.none);
+        final finalVideo = await mergeVideoWithOverlay(
+          videoPath,
+          overlayPath!,
+          animatedOverlayPath: animatedOverlayPath,
+          animationType: animationType ?? OverlayAnimationType.none,
+        );
         return finalVideo;
       }
     }

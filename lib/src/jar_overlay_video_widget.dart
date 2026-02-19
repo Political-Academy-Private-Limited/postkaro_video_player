@@ -51,6 +51,7 @@ class JarVideoPlayerOverlay extends StatefulWidget {
   /// - Video auto plays when visible
   /// - Video pauses when out of view
   /// - Optimized for vertical scrolling feeds
+  ///
   final bool reelsMode;
 
   /// Determines whether the video should start playing automatically.
@@ -69,6 +70,7 @@ class JarVideoPlayerOverlay extends StatefulWidget {
   /// Example:
   /// - 16/9 for landscape videos
   /// - 1.0 for square videos
+  ///
   final double aspectRatio;
 
   ///for download and share buttons
@@ -88,31 +90,45 @@ class JarVideoPlayerOverlay extends StatefulWidget {
   final Widget? animatedOverlay;
 
   ///
+  /// for selecting different animation type
+  /// basically it is starting and end point
+  /// when an widget will start animation and
+  /// end the animation
+  ///
   final OverlayAnimationType? animationType;
 
+  ///
+  ///custom progress indicator when video is being downloaded
+  ///by default there is CircularProgressIndicator in center
+  ///
   final Widget? shareDownloadProgressIndicator;
 
-  const JarVideoPlayerOverlay(
-      {super.key,
-      required this.url,
-      this.controller,
-      this.bottomStripe,
-      this.onDownload,
-      // this.overlayChild,
-      this.onShare,
-      this.reelsMode = false,
-      this.autoPlay = false,
-      this.loop = false,
-      this.right = 12,
-      this.topStripe,
-      this.aspectRatio = 9 / 16,
-      this.downloadIcon,
-      this.shareIcon,
-      this.downloadBackgroundColor,
-      this.shareBackgroundColor,
-      this.animatedOverlay,
-      this.animationType,
-      this.shareDownloadProgressIndicator});
+  ///download with custom overlays
+  ///
+  final bool downloadWithOverlay;
+  const JarVideoPlayerOverlay({
+    super.key,
+    required this.url,
+    this.controller,
+    this.bottomStripe,
+    this.onDownload,
+    // this.overlayChild,
+    this.onShare,
+    this.reelsMode = false,
+    this.autoPlay = false,
+    this.loop = false,
+    this.right = 12,
+    this.topStripe,
+    this.aspectRatio = 9 / 16,
+    this.downloadIcon,
+    this.shareIcon,
+    this.downloadBackgroundColor,
+    this.shareBackgroundColor,
+    this.animatedOverlay,
+    this.animationType,
+    this.shareDownloadProgressIndicator,
+    this.downloadWithOverlay = false,
+  });
 
   @override
   State<JarVideoPlayerOverlay> createState() => _JarVideoPlayerOverlayState();
@@ -135,7 +151,7 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
       final path = await exportVideoWithOverlay(
         videoUrl: widget.url,
         bottomOverlayKey: _bottomOverlayKey,
-        downloadWithOverlay: widget.bottomStripe != null,
+        downloadWithOverlay: widget.downloadWithOverlay,
         topOverlayKey: widget.topStripe == null ? null : _topOverlayKey,
         animatedOverlayKey:
             widget.animatedOverlay == null ? null : _animatedOverlayKey,
@@ -257,7 +273,7 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
                               color: Colors.white,
                               size: 26,
                             ),
-                        onTap: _handleDownload,
+                        onTap: widget.onDownload ?? _handleDownload,
                         disabled: _isProcessing,
                         backgroundColor: widget.downloadBackgroundColor,
                       ),
@@ -269,7 +285,7 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
                               color: Colors.white,
                               size: 26,
                             ),
-                        onTap: _handleShare,
+                        onTap: widget.onShare ?? _handleShare,
                         disabled: _isProcessing,
                         backgroundColor: widget.shareBackgroundColor ??
                             widget.downloadBackgroundColor,

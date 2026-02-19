@@ -1,10 +1,17 @@
 enum OverlayAnimationType {
   none,
+
+  // Basic
   topToCenter,
+  rightToCenter,
+  leftToCenter,
   bottomToCenter,
   leftToRight,
   rightToLeft,
+
+  // Diagonal
   diagonalTopLeftToBottomRight,
-  // centerToTopRight,
-  // centerToBottomLeft,
+  diagonalTopRightToBottomLeft,
+  diagonalBottomLeftToTopRight,
+  diagonalBottomRightToTopLeft,
 }

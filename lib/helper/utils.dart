@@ -244,6 +244,10 @@ String buildOverlayAnimation(
   const animTime = 2;
 
   switch (type) {
+    case OverlayAnimationType.none:
+      return "x=(main_w-overlay_w)/3:"
+          "y=(main_h-overlay_h)/3";
+
     case OverlayAnimationType.topToCenter:
       return "x=(main_w-overlay_w)/2:"
           "y=if(lt(t\\,$animTime)\\,"
@@ -275,19 +279,41 @@ String buildOverlayAnimation(
           "y=if(lt(t\\,$animTime)\\,"
           "-overlay_h + ((main_h-overlay_h)/2 + overlay_h)*(t/$animTime)\\,"
           "(main_h-overlay_h)/2)";
-    // case OverlayAnimationType.centerToTopRight:
-    //   return "x=(main_w-overlay_w)/2 + "
-    //       "((main_w-overlay_w)/2) * min(t/$animTime\\,1):"
-    //       "y=(main_h-overlay_h)/2 - "
-    //       "((main_h-overlay_h)/2) * min(t/$animTime\\,1)";
-    // case OverlayAnimationType.centerToBottomLeft:
-    //   return "x=(main_w-overlay_w)/2 - "
-    //       "((main_w-overlay_w)/2) * min(t/$animTime\\,1):"
-    //       "y=(main_h-overlay_h)/2 + "
-    //       "((main_h-overlay_h)/2) * min(t/$animTime\\,1)";
-
-    case OverlayAnimationType.none:
-      return "x=(main_w-overlay_w)/2:"
+    case OverlayAnimationType.leftToCenter:
+      return "x=if(lt(t\\,$animTime)\\,"
+          "-overlay_w + ((main_w-overlay_w)/2 + overlay_w)*(t/$animTime)\\,"
+          "(main_w-overlay_w)/2):"
           "y=(main_h-overlay_h)/2";
+
+    case OverlayAnimationType.rightToCenter:
+      return "x=if(lt(t\\,$animTime)\\,"
+          "main_w - (main_w-(main_w-overlay_w)/2)*(t/$animTime)\\,"
+          "(main_w-overlay_w)/2):"
+          "y=(main_h-overlay_h)/2";
+
+    case OverlayAnimationType.diagonalTopRightToBottomLeft:
+      return "x=if(lt(t\\,$animTime)\\,"
+          "main_w - (main_w-(main_w-overlay_w)/2)*(t/$animTime)\\,"
+          "(main_w-overlay_w)/2):"
+          "y=if(lt(t\\,$animTime)\\,"
+          "-overlay_h + ((main_h-overlay_h)/2 + overlay_h)*(t/$animTime)\\,"
+          "(main_h-overlay_h)/2)";
+    case OverlayAnimationType.diagonalBottomLeftToTopRight:
+      return "x=if(lt(t\\,$animTime)\\,"
+          "-overlay_w + ((main_w-overlay_w)/2 + overlay_w)*(t/$animTime)\\,"
+          "(main_w-overlay_w)/2):"
+          "y=if(lt(t\\,$animTime)\\,"
+          "main_h - (main_h-(main_h-overlay_h)/2)*(t/$animTime)\\,"
+          "(main_h-overlay_h)/2)";
+    case OverlayAnimationType.diagonalBottomRightToTopLeft:
+      return "x=if(lt(t\\,$animTime)\\,"
+          "main_w - (main_w)*(t/$animTime)\\,"
+          "0):"
+          "y=if(lt(t\\,$animTime)\\,"
+          "main_h - (main_h)*(t/$animTime)\\,"
+          "0)";
+
+
+
   }
 }
