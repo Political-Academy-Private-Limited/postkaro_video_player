@@ -32,7 +32,7 @@ Add the dependency to your `pubspec.yaml`:
 
 ``` yaml
 dependencies:
-  jar_video_player: ^0.1.4
+  jar_video_player: ^0.1.5
 ```
 
 Then run:
@@ -67,7 +67,7 @@ flutter pub get
 ```
 
 
-## 🚀 Overlya Jar Video Player
+## 🚀 Overlay Jar Video Player
 
 ``` dart
 import 'package:flutter/material.dart';
@@ -75,6 +75,13 @@ import 'package:jar_video_player/jar_video_player.dart';
 
 final controller = JarVideoPlayerController();
 
+
+
+///
+// this must be true 
+// for downloading and sharing the video with or without overlay 
+// downloadWithOverlay: true,
+///
 JarVideoPlayerOverlay(
         url: videoUrl,
         aspectRatio: 9 / 16,
@@ -89,6 +96,7 @@ JarVideoPlayerOverlay(
         // ),
 
         /// this is bottom overlay
+        downloadWithOverlay: true,
         bottomStripe: Container(
           color: Colors.red,
           width: double.infinity,
@@ -96,17 +104,44 @@ JarVideoPlayerOverlay(
           child: Text("Hello Sagar"),
         ),
 
+
         /// if you want custom downlaod or share functions
         // onDownload: () {},
         // onShare: () {},
 
         ///if you want reel mode, controller is not necessary
         // controller: ctrl,
+
       ),
     );
 ```
 
 ------------------------------------------------------------------------
+
+
+
+
+```dart
+///types of Overlay Animations
+enum OverlayAnimationType {
+  none, /// defauls to 'top left' 
+
+  // Basic
+  topToCenter,
+  rightToCenter,
+  leftToCenter,
+  bottomToCenter,
+  leftToRight,
+  rightToLeft,
+
+  // Diagonal
+  diagonalTopLeftToBottomRight,
+  diagonalTopRightToBottomLeft,
+  diagonalBottomLeftToTopRight,
+  diagonalBottomRightToTopLeft,
+}
+
+```
 
 ## 🎬 Reels Mode
 
