@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jar_video_player/jar_video_player.dart';
 
 import 'home.dart';
 
