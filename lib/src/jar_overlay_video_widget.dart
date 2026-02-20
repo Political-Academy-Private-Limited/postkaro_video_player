@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:jar_video_player/helper/animation_widget.dart';
 import 'package:jar_video_player/helper/utils.dart';
@@ -113,7 +111,7 @@ class JarVideoPlayerOverlay extends StatefulWidget {
 
   ///this is for route chage play pause
   ///
-  final RouteObserver<ModalRoute<dynamic>>? routeObserver;
+  final VideoRouteObserver? videoRouteObserver;
   const JarVideoPlayerOverlay({
     super.key,
     required this.url,
@@ -137,7 +135,7 @@ class JarVideoPlayerOverlay extends StatefulWidget {
     this.shareDownloadProgressIndicator,
     this.downloadWithOverlay = false,
     this.onStatusChanged,
-    this.routeObserver,
+    this.videoRouteObserver,
   });
 
   @override
@@ -245,9 +243,8 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
                     reelsMode: widget.reelsMode,
                     autoPlay: widget.autoPlay,
                     loop: widget.loop,
-                    routeObserver: widget.routeObserver,
+                    videoRouteObserver: widget.videoRouteObserver,
                     onStatusChanged: (isLoading, progress) {
-                      log(isLoading.toString());
                       setState(() {
                         isVideoLoading = isLoading;
                         videoProgress = progress;

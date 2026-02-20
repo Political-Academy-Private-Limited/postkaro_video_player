@@ -1,9 +1,14 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-import '../helper/jar_video_player_controller.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'dart:io';
+
+import '../jar_video_player.dart';
+
+// import '../jar_video_player.dart';
 
 /// A customizable video player widget for playing network videos.
 ///
@@ -13,7 +18,7 @@ import 'dart:io';
 
 class JarVideoPlayer extends StatefulWidget {
   /// This is for pausing and playing the video if routes changes!!!
-  final RouteObserver<ModalRoute>? routeObserver;
+  final VideoRouteObserver? videoRouteObserver;
 
   /// Network video URL to play.
   final String url;
@@ -60,10 +65,10 @@ class JarVideoPlayer extends StatefulWidget {
     required this.url,
     this.autoPlay = false,
     this.loop = false,
-    this.routeObserver,
     this.reelsMode = false,
     this.aspectRatio,
     this.onStatusChanged,
+    this.videoRouteObserver,
   });
   @override
   State<JarVideoPlayer> createState() => _JarVideoPlayerState();
@@ -72,21 +77,46 @@ class JarVideoPlayer extends StatefulWidget {
 class _JarVideoPlayerState extends State<JarVideoPlayer>
     with WidgetsBindingObserver, RouteAware {
   late final JarVideoPlayerController _controller;
+
   bool _disposed = false;
   int _initToken = 0;
   bool _loading = true;
   bool _isVisible = false;
-
+  bool _overlayActive = false;
+  bool _isActuallyPlaying = false;
+  late VoidCallback _openListener;
+  late VoidCallback _closeListener;
+  @override
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
     _controller = widget.controller ?? JarVideoPlayerController();
+    if (widget.videoRouteObserver != null) {
+      _openListener = () {
+        _overlayActive = true;
+        _safePause();
+      };
+
+      _closeListener = () {
+        _overlayActive = false;
+        if (widget.autoPlay || widget.reelsMode) {
+          _safePlay();
+        }
+      };
+
+      widget.videoRouteObserver!.addListener(
+        onOpen: _openListener,
+        onClose: _closeListener,
+      );
+    }
+
     _init();
   }
 
   Future<void> _init() async {
+    if (_controller.isInitialized) return;
     final currentToken = ++_initToken;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -108,12 +138,14 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
         return;
       }
 
-      if (widget.reelsMode) {
-        if (_isVisible) {
-          _controller.play();
+      if (!_overlayActive) {
+        if (widget.reelsMode) {
+          if (_isVisible) {
+            _safePlay();
+          }
+        } else if (widget.autoPlay) {
+          _safePlay();
         }
-      } else if (widget.autoPlay) {
-        _controller.play();
       }
 
       setState(() {
@@ -130,36 +162,21 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
     }
   }
 
-  /// ---------------------------
-  /// Route Handling
-  /// ---------------------------
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    if (widget.routeObserver != null) {
-      final route = ModalRoute.of(context);
-      if (route is PageRoute) {
-        widget.routeObserver!.subscribe(this, route);
-      }
-    }
-  }
-
   @override
   void dispose() {
     _disposed = true;
-
+    if (widget.videoRouteObserver != null) {
+      widget.videoRouteObserver!.removeListener(
+        onOpen: _openListener,
+        onClose: _closeListener,
+      );
+    }
     _controller.pause();
 
     ///  stop audio immediately
     _controller.disposeVideo();
 
     /// free decoder
-
-    if (widget.routeObserver != null) {
-      widget.routeObserver!.unsubscribe(this);
-    }
 
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -205,7 +222,7 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
   ///---------------------------
 
   Future<void> _handleVisibility(double visibleFraction) async {
-    if (!widget.reelsMode || _disposed) return;
+    if (!widget.reelsMode || _disposed || _overlayActive) return;
 
     final isNowVisible = visibleFraction > 0.6;
 
@@ -217,12 +234,10 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
       if (!_controller.isInitialized) {
         await _init();
       } else {
-        _controller.play();
+        _safePlay(); // use safe version
       }
     } else {
-      await _controller.pause();
-
-      /// pause immediately
+      _safePause(); // use safe version
     }
   }
 
@@ -231,28 +246,33 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
   ///---------------------------
 
   void _safePlay() {
+    if (_overlayActive) return;
     if (!_controller.isInitialized) return;
-    if (_controller.isPlaying) return;
+    log("before play 275");
 
     _controller.play();
+    log("after play 275");
+    _isActuallyPlaying = true;
   }
 
-  void _safePause() {
+  void _safePause() async {
     if (!_controller.isInitialized) return;
-    if (!_controller.isPlaying) return;
+    log("before pause 282");
 
     _controller.pause();
+
+    _isActuallyPlaying = false;
   }
 
+  //
   void _togglePlayPause() {
     if (!_controller.isInitialized) return;
 
-    if (_controller.isPlaying) {
+    if (_isActuallyPlaying) {
       _safePause();
     } else {
       _safePlay();
     }
-
     setState(() {});
   }
 
@@ -260,40 +280,12 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
   ///UI
   ///---------------------------
 
-  void _handleOverlayState() {
-    final route = ModalRoute.of(context);
-
-    final isRouteCurrent = route?.isCurrent ?? true;
-    final isTickerEnabled = TickerMode.of(context);
-
-    final shouldPause = !isRouteCurrent || !isTickerEnabled;
-
-    if (shouldPause) {
-      _safePause();
-    } else {
-      if (widget.autoPlay || widget.reelsMode) {
-        _safePlay();
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_loading || !_controller.isInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _handleOverlayState();
-      }
-    });
 
-    // final vc = _controller.videoController;
-    //
-    // final video = AspectRatio(
-    //   aspectRatio: widget.aspectRatio ?? vc?.value.aspectRatio ?? 9 / 16,
-    //   child: vc != null ? VideoPlayer(vc) : const SizedBox.shrink(),
-    // );
     final vc = _controller.videoController;
 
     Widget video;

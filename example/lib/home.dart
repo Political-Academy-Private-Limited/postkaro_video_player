@@ -3,6 +3,8 @@ import 'package:example/test_class.dart';
 import 'package:flutter/material.dart';
 import 'package:jar_video_player/jar_video_player.dart';
 
+import 'main.dart';
+
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -52,6 +54,28 @@ class _HomeState extends State<Home> {
         controller: _pageController,
         scrollDirection: Axis.vertical,
         itemCount: isVideoPage.length,
+        onPageChanged: (value) {
+          if (value % 2 == 0) {
+            showModalBottomSheet(
+              context: context,
+              builder: (context) {
+                return Container(
+                  height: 200,
+                  padding: const EdgeInsets.all(20),
+                  child: const Center(
+                    child: Text(
+                      "Hello",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+        },
         itemBuilder: (context, index) {
           if (isVideoPage[index]) {
             return _buildVideoPage(index);
@@ -109,6 +133,7 @@ class _HomeState extends State<Home> {
         aspectRatio: 9 / 16,
         reelsMode: true,
         downloadWithOverlay: true,
+        videoRouteObserver: videoRouteObserver,
         topStripe: Container(
           color: Colors.green,
           width: double.infinity,

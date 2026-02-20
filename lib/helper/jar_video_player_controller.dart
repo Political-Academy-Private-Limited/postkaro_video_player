@@ -39,7 +39,6 @@ class JarVideoPlayerController {
 
       ///  Use local file instead of network
       _videoController = VideoPlayerController.file(file);
-
       await _videoController!.initialize();
       await _videoController!.setLooping(loop);
 

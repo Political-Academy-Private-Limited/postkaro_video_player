@@ -24,3 +24,4 @@ export 'helper/jar_video_player_controller.dart';
 export 'src/jar_overlay_video_widget.dart';
 export 'helper/overlay_animation_type.dart';
 export 'helper/blur_image.dart';
+export 'src/video_route_observer.dart';
