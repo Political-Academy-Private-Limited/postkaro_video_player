@@ -118,17 +118,34 @@ class JarVideoPlayerOverlay extends StatefulWidget {
   final void Function(bool, double)? onStatusChanged;
 
   ///
-  ///this is for route change play pause
-  ///
-
-  ///
   ///for custom download and share location
+  ///default will be left 0, right 6, top 0 and bottom 0;
   ///
   final double top;
   final double bottom;
   final double? left;
 
+  ///
+  ///for space bw download and share buttons
+  ///default to 16
+  ///
+  final double spaceBwDownShare;
+
+  ///
+  ///this is for route change play pause
+  ///this helps to auto pause the video
+  ///if
+  /// any bottom sheet is open or
+  /// dialog box is open, it auto pause and play the video
+  ///
   final VideoRouteObserver? videoRouteObserver;
+
+  ///
+  ///this is for the folder name where
+  /// the downloaded video will save
+  ///
+  final String? folderName;
+
   const JarVideoPlayerOverlay({
     super.key,
     required this.url,
@@ -158,6 +175,8 @@ class JarVideoPlayerOverlay extends StatefulWidget {
     this.top = 0,
     this.bottom = 0,
     this.left,
+    this.spaceBwDownShare = 16,
+    this.folderName,
   });
 
   @override
@@ -191,14 +210,29 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
       );
 
       if (path != null) {
+        ///initializing the media store
         await MediaStore.ensureInitialized();
-        MediaStore.appFolder = "Overlay Video";
 
+        ///
+        ///this is where download file will be saved
+        ///
+        MediaStore.appFolder = widget.folderName ?? "Overlay Video";
+
+        ///
+        ///for saving the temp file to file
+        ///so user can see it in gallery
+        ///
         await MediaStore().saveFile(
           tempFilePath: path,
           dirType: DirType.video,
           dirName: DirName.movies,
         );
+
+        ///
+        /// this is for bool call back
+        /// when a video is downloaded
+        /// it return true to it's parent.
+        ///
         widget.onDownloadComplete?.call(true);
       }
     } catch (e) {
@@ -218,6 +252,10 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
     setState(() => _isProcessing = true);
 
     try {
+      ///
+      ///this is the main function for handling the merger of
+      ///normal video and overlay widgets
+      ///
       final path = await exportVideoWithOverlay(
         videoUrl: widget.url,
         bottomOverlayKey: _bottomOverlayKey,
@@ -248,6 +286,8 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
     return Column(
       children: [
         /// top overlay Overlay
+        /// with global key attached to it
+        ///
 
         if (widget.topStripe != null)
           RepaintBoundary(
@@ -259,6 +299,9 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
           child: Stack(
             children: [
               /// Video  (Full Screen Cover)
+              /// the video is cached, it don't load from internet
+              /// it users the cached video to show
+              ///
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
@@ -271,10 +314,17 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
                     autoPlay: widget.autoPlay,
                     loop: widget.loop,
                     videoRouteObserver: widget.videoRouteObserver,
+
+                    ///
+                    ///this is if video is loaded or not
+                    ///return true only if video is completely loaded
+                    ///
                     onStatusChanged: (isLoading, progress) {
                       setState(() {
                         isVideoLoading = isLoading;
                         videoProgress = progress;
+
+                        /// it return the status of the video
                         widget.onStatusChanged?.call(false, 0);
                       });
                     },
@@ -292,6 +342,10 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
                     child: widget.bottomStripe!,
                   ),
                 ),
+
+              ///
+              /// this is only for overlay which can be animated
+              ///
               if (widget.animatedOverlay != null && !isVideoLoading)
                 RepaintBoundary(
                   key: _animatedOverlayKey,
@@ -323,7 +377,7 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
                         disabled: _isProcessing,
                         backgroundColor: widget.downloadBackgroundColor,
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: widget.spaceBwDownShare),
                       _ActionButton(
                         icon: widget.shareIcon ??
                             Icon(
