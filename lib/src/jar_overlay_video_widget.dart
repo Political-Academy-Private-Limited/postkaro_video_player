@@ -303,7 +303,6 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
                 ),
 
               /// Buttons (center right)
-              /// todo
               Positioned(
                 right: widget.right,
                 top: widget.top,
