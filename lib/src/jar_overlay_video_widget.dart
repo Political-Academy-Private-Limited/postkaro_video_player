@@ -108,9 +108,12 @@ class JarVideoPlayerOverlay extends StatefulWidget {
   ///download with custom overlays
   final bool downloadWithOverlay;
 
-  ////
+  ///
   final void Function(bool, double)? onStatusChanged;
 
+  ///this is for route chage play pause
+  ///
+  final RouteObserver<ModalRoute<dynamic>>? routeObserver;
   const JarVideoPlayerOverlay({
     super.key,
     required this.url,
@@ -134,6 +137,7 @@ class JarVideoPlayerOverlay extends StatefulWidget {
     this.shareDownloadProgressIndicator,
     this.downloadWithOverlay = false,
     this.onStatusChanged,
+    this.routeObserver,
   });
 
   @override
@@ -241,6 +245,7 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
                     reelsMode: widget.reelsMode,
                     autoPlay: widget.autoPlay,
                     loop: widget.loop,
+                    routeObserver: widget.routeObserver,
                     onStatusChanged: (isLoading, progress) {
                       log(isLoading.toString());
                       setState(() {
