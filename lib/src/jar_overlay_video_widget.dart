@@ -40,6 +40,14 @@ class JarVideoPlayerOverlay extends StatefulWidget {
   /// Allows integration with share plugins or custom share logic.
   final VoidCallback? onShare;
 
+  /// Called after download is completed.
+  /// Returns true if download was successful.
+  final void Function(bool success)? onDownloadComplete;
+
+  /// Called after share is completed.
+  /// Returns true if share was successful.
+  final void Function(bool success)? onShareComplete;
+
   /// Distance from the right side for positioning overlay controls.
   ///
   /// Useful for adjusting layout in reels-style UI.
@@ -136,6 +144,8 @@ class JarVideoPlayerOverlay extends StatefulWidget {
     this.downloadWithOverlay = false,
     this.onStatusChanged,
     this.videoRouteObserver,
+    this.onDownloadComplete,
+    this.onShareComplete,
   });
 
   @override
@@ -177,8 +187,11 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
           dirType: DirType.video,
           dirName: DirName.movies,
         );
+        widget.onDownloadComplete?.call(true);
       }
     } catch (e) {
+      widget.onDownloadComplete?.call(false);
+
       throw e.toString();
     }
     if (mounted) {
@@ -205,9 +218,11 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
 
       if (path != null) {
         await shareVideo(path);
-        widget.onShare?.call(); // optional external callback
+        widget.onShareComplete?.call(true);
       }
     } catch (e) {
+      widget.onShareComplete?.call(false);
+
       throw e.toString();
     }
 
