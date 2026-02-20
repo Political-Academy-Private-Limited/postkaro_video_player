@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -262,12 +260,33 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
   ///UI
   ///---------------------------
 
+  void _handleOverlayState() {
+    final route = ModalRoute.of(context);
+
+    final isRouteCurrent = route?.isCurrent ?? true;
+    final isTickerEnabled = TickerMode.of(context);
+
+    final shouldPause = !isRouteCurrent || !isTickerEnabled;
+
+    if (shouldPause) {
+      _safePause();
+    } else {
+      if (widget.autoPlay || widget.reelsMode) {
+        _safePlay();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    log("line 345 $_loading and ${!_controller.isInitialized}");
     if (_loading || !_controller.isInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _handleOverlayState();
+      }
+    });
 
     // final vc = _controller.videoController;
     //
