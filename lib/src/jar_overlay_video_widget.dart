@@ -117,8 +117,17 @@ class JarVideoPlayerOverlay extends StatefulWidget {
   ///
   final void Function(bool, double)? onStatusChanged;
 
-  ///this is for route chage play pause
   ///
+  ///this is for route change play pause
+  ///
+
+  ///
+  ///for custom download and share location
+  ///
+  final double top;
+  final double bottom;
+  final double? left;
+
   final VideoRouteObserver? videoRouteObserver;
   const JarVideoPlayerOverlay({
     super.key,
@@ -131,7 +140,7 @@ class JarVideoPlayerOverlay extends StatefulWidget {
     this.reelsMode = false,
     this.autoPlay = false,
     this.loop = false,
-    this.right = 12,
+    this.right = 6,
     this.topStripe,
     this.aspectRatio = 9 / 16,
     this.downloadIcon,
@@ -146,6 +155,9 @@ class JarVideoPlayerOverlay extends StatefulWidget {
     this.videoRouteObserver,
     this.onDownloadComplete,
     this.onShareComplete,
+    this.top = 0,
+    this.bottom = 0,
+    this.left,
   });
 
   @override
@@ -291,10 +303,12 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
                 ),
 
               /// Buttons (center right)
+              /// todo
               Positioned(
-                right: 12,
-                top: 0,
-                bottom: 0,
+                right: widget.right,
+                top: widget.top,
+                bottom: widget.bottom,
+                left: widget.left,
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
