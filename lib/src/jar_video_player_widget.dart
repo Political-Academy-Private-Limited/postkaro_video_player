@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -81,7 +80,6 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
   bool _isVisible = false;
   bool _overlayActive = false;
   bool _isActuallyPlaying = false;
-  bool _isOnTopRoute = true;
   Route<dynamic>? _ownerRoute;
   late void Function(Route?) _openListener;
   late void Function(Route?) _closeListener;
@@ -93,10 +91,8 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
 
     _controller = widget.controller ?? JarVideoPlayerController();
     if (widget.videoRouteObserver != null) {
-      log("widget video routes observer");
 
       _openListener = (Route? routeUnderOverlay) {
-        log("this is called");
 
         if (routeUnderOverlay != _ownerRoute) return;
         _overlayActive = true;

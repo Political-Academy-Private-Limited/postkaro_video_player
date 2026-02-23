@@ -77,20 +77,19 @@ class VideoRouteObserver extends NavigatorObserver {
 
   @override
   void didPush(Route route, Route? previousRoute) {
-    log("did inside");
-    if (_isOverlay(route)) {
-      for (final listener in _onOverlayOpenListeners) {
-        listener(previousRoute);
-      }
+    // if (_isOverlay(route)) {
+    for (final listener in _onOverlayOpenListeners) {
+      listener(previousRoute);
     }
+    // }
   }
 
   @override
   void didPop(Route route, Route? previousRoute) {
-    if (_isOverlay(route)) {
-      for (final listener in _onOverlayCloseListeners) {
-        listener(previousRoute);
-      }
+    // if (_isOverlay(route)) {
+    for (final listener in _onOverlayCloseListeners) {
+      listener(previousRoute);
     }
+    // }
   }
 }
