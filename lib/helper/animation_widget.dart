@@ -40,9 +40,13 @@ class _AnimationWidgetState extends State<AnimationWidget> {
       // ======================
       // NONE
       // ======================
+      case OverlayAnimationType.topCenter:
+        _startAlignment = Alignment.topCenter;
+        _endAlignment = Alignment.topCenter;
+        break;
       case OverlayAnimationType.none:
-        _startAlignment = Alignment.center;
-        _endAlignment = Alignment.center;
+        _startAlignment = Alignment.topLeft;
+        _endAlignment = Alignment.topLeft;
         break;
 
       // ======================

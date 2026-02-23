@@ -1,5 +1,6 @@
 enum OverlayAnimationType {
   none,
+  topCenter,
 
   // Basic
   topToCenter,

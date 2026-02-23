@@ -339,6 +339,10 @@ String buildOverlayAnimation(
       return "x=(main_w-overlay_w)/3:"
           "y=(main_h-overlay_h)/3";
 
+    case OverlayAnimationType.topCenter:
+      return "x=(main_w-overlay_w)/2:"
+          "y=0";
+
     case OverlayAnimationType.topToCenter:
       return "x=(main_w-overlay_w)/2:"
           "y=if(lt(t\\,$animTime)\\,"
