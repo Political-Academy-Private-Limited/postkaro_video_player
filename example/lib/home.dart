@@ -20,7 +20,6 @@ class _HomeState extends State<Home> {
   final List<String> videoUrls = <String>[
     "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4",
     "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-
   ];
 
   @override

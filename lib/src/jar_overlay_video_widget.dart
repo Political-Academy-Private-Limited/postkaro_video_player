@@ -310,33 +310,28 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
               /// it users the cached video to show
               ///
               Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.red),
-                  ),
-                  child: JarVideoPlayer(
-                    url: widget.url,
-                    controller: widget.controller,
-                    reelsMode: widget.reelsMode,
-                    autoPlay: widget.autoPlay,
-                    loop: widget.loop,
-                    videoRouteObserver: widget.videoRouteObserver,
+                child: JarVideoPlayer(
+                  url: widget.url,
+                  controller: widget.controller,
+                  reelsMode: widget.reelsMode,
+                  autoPlay: widget.autoPlay,
+                  loop: widget.loop,
+                  videoRouteObserver: widget.videoRouteObserver,
 
-                    ///
-                    ///this is if video is loaded or not
-                    ///return true only if video is completely loaded
-                    ///
-                    onStatusChanged: (isLoading, progress) {
-                      setState(() {
-                        isVideoLoading = isLoading;
-                        videoProgress = progress;
+                  ///
+                  ///this is if video is loaded or not
+                  ///return true only if video is completely loaded
+                  ///
+                  onStatusChanged: (isLoading, progress) {
+                    setState(() {
+                      isVideoLoading = isLoading;
+                      videoProgress = progress;
 
-                        /// it return the status of the video
-                        widget.onStatusChanged?.call(false, 0);
-                      });
-                    },
-                    // aspectRatio: 9/16,
-                  ),
+                      /// it return the status of the video
+                      widget.onStatusChanged?.call(false, 0);
+                    });
+                  },
+                  // aspectRatio: 9/16,
                 ),
               ),
 
