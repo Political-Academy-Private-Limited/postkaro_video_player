@@ -18,10 +18,7 @@ class TestClass extends StatelessWidget {
               const Center(
                 child: Text(
                   "Bottom Sheet",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 20),
@@ -51,11 +48,32 @@ class TestClass extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: ElevatedButton(
-          onPressed: () => _openBottomSheet(context),
-          child: const Text("Open Bottom Sheet"),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () => _openBottomSheet(context),
+              child: const Text("Open Bottom Sheet"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ThirdScreen()),
+              ),
+              child: const Text("Third Screen"),
+            ),
+          ],
         ),
       ),
     );
+  }
+}
+
+class ThirdScreen extends StatelessWidget {
+  const ThirdScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(body: Center(child: Text("hello ")));
   }
 }

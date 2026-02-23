@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 //
 // class VideoRouteObserver extends NavigatorObserver {
@@ -75,9 +77,10 @@ class VideoRouteObserver extends NavigatorObserver {
 
   @override
   void didPush(Route route, Route? previousRoute) {
+    log("did inside");
     if (_isOverlay(route)) {
       for (final listener in _onOverlayOpenListeners) {
-        listener(previousRoute); // 🔥 pass owner
+        listener(previousRoute);
       }
     }
   }
@@ -86,7 +89,7 @@ class VideoRouteObserver extends NavigatorObserver {
   void didPop(Route route, Route? previousRoute) {
     if (_isOverlay(route)) {
       for (final listener in _onOverlayCloseListeners) {
-        listener(previousRoute); // 🔥 pass owner
+        listener(previousRoute);
       }
     }
   }

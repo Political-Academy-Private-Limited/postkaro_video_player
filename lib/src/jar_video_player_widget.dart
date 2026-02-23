@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -7,8 +6,6 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'dart:io';
 
 import '../jar_video_player.dart';
-
-// import '../jar_video_player.dart';
 
 /// A customizable video player widget for playing network videos.
 ///
@@ -75,7 +72,7 @@ class JarVideoPlayer extends StatefulWidget {
 }
 
 class _JarVideoPlayerState extends State<JarVideoPlayer>
-    with WidgetsBindingObserver, RouteAware {
+    with WidgetsBindingObserver {
   late final JarVideoPlayerController _controller;
 
   bool _disposed = false;
@@ -96,9 +93,12 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
 
     _controller = widget.controller ?? JarVideoPlayerController();
     if (widget.videoRouteObserver != null) {
-      _openListener = (Route? routeUnderOverlay) {
-        if (routeUnderOverlay != _ownerRoute) return;
+      log("widget video routes observer");
 
+      _openListener = (Route? routeUnderOverlay) {
+        log("this is called");
+
+        if (routeUnderOverlay != _ownerRoute) return;
         _overlayActive = true;
         _safePause();
       };
@@ -181,6 +181,7 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
     _controller.pause();
 
     ///  stop audio immediately
+
     _controller.disposeVideo();
 
     /// free decoder
@@ -192,25 +193,7 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
     _ownerRoute = ModalRoute.of(context);
-  }
-
-  @override
-  void didPushNext() {
-    _isOnTopRoute = false;
-    log("did push next $_isOnTopRoute");
-    _safePause();
-  }
-
-  @override
-  void didPopNext() {
-    log("did pop next  $_isOnTopRoute");
-
-    _isOnTopRoute = true;
-    if (widget.autoPlay || widget.reelsMode) {
-      _safePlay();
-    }
   }
 
   /// ---------------------------
@@ -222,14 +205,17 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
     if (!_controller.isInitialized) return;
 
     ///automatically pause when the screen is not in focus or is not visible
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
+    if (state == AppLifecycleState.paused) {
       _safePause();
     }
 
     ///automatically play the video if it comes back to focus or is visible.
 
     else if (state == AppLifecycleState.resumed) {
+      if (_isActuallyPlaying) {
+        _safePlay();
+        return;
+      }
       if (widget.autoPlay || widget.reelsMode) {
         _safePlay();
       }
@@ -253,10 +239,12 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
       if (!_controller.isInitialized) {
         await _init();
       } else {
-        _safePlay(); // use safe version
+        /// use safe version
+        _safePlay();
       }
     } else {
-      _safePause(); // use safe version
+      /// use safe version
+      _safePause();
     }
   }
 
@@ -267,23 +255,20 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
   void _safePlay() {
     if (_overlayActive) return;
     if (!_controller.isInitialized) return;
-    log("before play 275");
 
     _controller.play();
-    log("after play 275");
     _isActuallyPlaying = true;
   }
 
   void _safePause() async {
     if (!_controller.isInitialized) return;
-    log("before pause 282");
 
     _controller.pause();
 
     _isActuallyPlaying = false;
   }
 
-  //
+  ///
   void _togglePlayPause() {
     if (!_controller.isInitialized) return;
 
@@ -321,7 +306,7 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
         ),
       );
     } else {
-      // 🎥 Normal Aspect Ratio Mode
+      ///  Normal Aspect Ratio Mode
       video = AspectRatio(
         aspectRatio: widget.aspectRatio ?? vc!.value.aspectRatio,
         child: VideoPlayer(vc!),
