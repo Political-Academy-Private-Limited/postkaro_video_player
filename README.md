@@ -14,8 +14,7 @@ https://github.com/user-attachments/assets/f1f8e44a-3425-4870-aa0e-35beab325ad8
 ------------------------------------------------------------------------
 
 ## ✨ Features
-
--   🎥 Network video playback
+-   🎥 Network video playback (mp4, m3u8, etc.)
 -   🔁 Reels mode (auto play/pause based on visibility)
 -   🔄 Route-aware auto pause
 -   📱 App lifecycle handling (background/foreground safety)
@@ -23,7 +22,23 @@ https://github.com/user-attachments/assets/f1f8e44a-3425-4870-aa0e-35beab325ad8
 -   ⚡ Optimized for `PageView` reels
 -   🧠 Safe async initialization (prevents ghost audio issues)
 -   🧹 Proper resource disposal to prevent memory leaks
-
+-   🎨 Custom top & bottom overlay support
+-   📥 Download video with overlays rendered
+-   🎬 Animated overlay support with multiple animation types
+-   🔊 Built-in Text-to-Speech (TTS) audio generation
+-   🎵 Custom external audio merging support
+-   📤 Built-in share functionality
+-   🧩 Custom download & share callbacks
+-   📊 Download/share status callbacks with progress tracking
+-   🎚 Customizable overlay animation positions
+-   🖼 Aspect ratio customization (9/16, 16/9, 1:1, etc.)
+-   🔄 Auto-play & loop control options
+-   🎨 Customizable download & share button styles
+-   📂 Custom folder saving support
+-   🎯 Configurable overlay control positioning
+-   🧱 Even-dimension scaling for FFmpeg compatibility
+-   🚀 Faststart MP4 optimization for smooth playback
+-   🛡 Null-safe & production-ready architecture
 ------------------------------------------------------------------------
 
 ## 📦 Installation
@@ -83,37 +98,56 @@ final controller = JarVideoPlayerController();
 // downloadWithOverlay: true,
 ///
 JarVideoPlayerOverlay(
-        url: videoUrl,
-        aspectRatio: 9 / 16,
-        reelsMode: true,
+  url: videoUrl,
+  aspectRatio: 9 / 16,
+  reelsMode: true,
 
-        ///top overlay widget
-        // topStripe: Container(
-        //   color: Colors.green,
-        //   width: double.infinity,
-        //   height: 50,
-        //   child: Text("Hello leaders", style: TextStyle(fontSize: 37)),
-        // ),
+  /// Enable download with overlays
+  downloadWithOverlay: true,
 
-        /// this is bottom overlay
-        downloadWithOverlay: true,
-        bottomStripe: Container(
-          color: Colors.red,
-          width: double.infinity,
-          height: 70,
-          child: Text("Hello Sagar"),
-        ),
+  /// 🔊 This will generate TTS and merge as audio
+  ttsText: "Hello Sagar",
 
-
-        /// if you want custom downlaod or share functions
-        // onDownload: () {},
-        // onShare: () {},
-
-        ///if you want reel mode, controller is not necessary
-        // controller: ctrl,
-
+  /// Bottom overlay widget
+  bottomStripe: Container(
+    color: Colors.red,
+    width: double.infinity,
+    height: 70,
+    alignment: Alignment.center,
+    child: const Text(
+      "Hello Sagar",
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
       ),
-    );
+    ),
+  ),
+
+  /// Optional top overlay
+  // topStripe: Container(
+  //   color: Colors.green,
+  //   height: 50,
+  //   alignment: Alignment.center,
+  //   child: const Text("Hello leaders"),
+  // ),
+
+  /// Optional animation overlay
+  // animatedOverlay: Image.asset("assets/anim.png"),
+  // animationType: OverlayAnimationType.centerToBottom,
+
+  /// Optional custom folder
+  // folderName: "SanatanVideos",
+
+  /// Optional callbacks
+  // onDownloadComplete: (success) {
+  //   print("Download completed: $success");
+  // },
+
+  // onShareComplete: (success) {
+  //   print("Share completed: $success");
+  // },
+);
 ```
 
 ------------------------------------------------------------------------

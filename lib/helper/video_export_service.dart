@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:jar_video_player/helper/utils.dart';
 
@@ -27,8 +29,9 @@ Future<String?> exportVideoWithOverlay({
 
     if (ttsText != null) {
       audioFilePath = await convertTextToSpeech(ttsText);
+      log(audioFilePath.toString());
     }
-
+    log(audioFilePath?.isEmpty.toString() ?? "no tts file");
     String? animatedOverlayPath;
 
     if (animatedOverlayKey != null) {
@@ -54,10 +57,13 @@ Future<String?> exportVideoWithOverlay({
     } else {
       /// 3️⃣ Merge with FFmpeg
       if (videoPath != null) {
-        final finalVideo = await mergeVideoWithOverlay(videoPath, overlayPath!,
-            animatedOverlayPath: animatedOverlayPath,
-            animationType: animationType ?? OverlayAnimationType.none,
-            audioFilePath: audioFilePath);
+        final finalVideo = await mergeVideoWithOverlay(
+          videoPath,
+          overlayPath!,
+          animatedOverlayPath: animatedOverlayPath,
+          animationType: animationType ?? OverlayAnimationType.none,
+          audioFilePath: audioFilePath,
+        );
         return finalVideo;
       }
     }

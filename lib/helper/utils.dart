@@ -56,11 +56,7 @@ Future<String?> captureOverlay(GlobalKey key, String fileName) async {
 Future<String?> convertTextToSpeech(String title) async {
   try {
     final FlutterTts flutterTts = FlutterTts();
-
-    /// Get proper app directory
-    final Directory dir = await getApplicationDocumentsDirectory();
-    final String fileName = 'tts_${DateTime.now().millisecondsSinceEpoch}.mp3';
-    final String filePath = '${dir.path}/$fileName';
+    final String fileName = "tts_${DateTime.now().millisecondsSinceEpoch}.mp3";
 
     await flutterTts.setLanguage("hi-IN");
     await flutterTts.setSpeechRate(0.5);
@@ -68,7 +64,7 @@ Future<String?> convertTextToSpeech(String title) async {
     await flutterTts.setPitch(1.0);
     await flutterTts.awaitSynthCompletion(true);
 
-    /// Select Hindi voice (optional but kept same logic)
+    /// Hindi voice selection
     List<dynamic> voices = await flutterTts.getVoices;
     for (var voice in voices) {
       if (voice is Map &&
@@ -82,17 +78,36 @@ Future<String?> convertTextToSpeech(String title) async {
       }
     }
 
-    /// IMPORTANT: pass full path here
-    await flutterTts.synthesizeToFile(title, filePath);
+    final result = await flutterTts.synthesizeToFile(title, fileName);
 
-    final file = File(filePath);
+    if (result != 1) return null;
 
-    if (await file.exists()) {
-      return filePath;
-    } else {
-      return null;
+    /// Android common save locations
+    final possibleDirs = [
+      "/storage/emulated/0/Music/",
+      "/storage/emulated/0/Ringtones/",
+      "/storage/emulated/0/Download/",
+    ];
+
+    String? finalPath;
+
+    for (int i = 0; i < 10; i++) {
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      for (final dir in possibleDirs) {
+        final file = File("$dir$fileName");
+        if (await file.exists()) {
+          finalPath = file.path;
+          break;
+        }
+      }
+
+      if (finalPath != null) break;
     }
+
+    return finalPath;
   } catch (e) {
+    print("TTS ERROR: $e");
     return null;
   }
 }
@@ -233,9 +248,17 @@ Future<String?> mergeVideoWithOverlay(
     String audioMap;
     String audioCodec;
 
+    // if (audioFilePath != null && audioIndex != null) {
+    //   audioMap = "-map $audioIndex:0";
+    //   audioCodec = "-c:a aac -shortest";
+    // } else {
+    //   audioMap = "-map 0:a?";
+    //   audioCodec = "-c:a copy";
+    // }
+
     if (audioFilePath != null && audioIndex != null) {
-      audioMap = "-map \"$audioIndex:a\"";
-      audioCodec = "-c:a aac -shortest";
+      audioMap = "-map $audioIndex:0";
+      audioCodec = "-c:a aac -t $duration";
     } else {
       audioMap = "-map 0:a?";
       audioCodec = "-c:a copy";

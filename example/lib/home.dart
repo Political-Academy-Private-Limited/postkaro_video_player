@@ -20,13 +20,14 @@ class _HomeState extends State<Home> {
   final List<String> videoUrls = <String>[
     // "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4",
     // "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-    "https://postkarocdn.blr1.digitaloceanspaces.com/Sanatan/post/videos/1771126864922.mp4",
-    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216148375.mp4",
-    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216127404.mp4",
-    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216102250.mp4",
-    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216082997.mp4",
-    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216102250.mp4",
-    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216102250.mp4",
+    // "https://postkarocdn.blr1.digitaloceanspaces.com/Sanatan/post/videos/1771126864922.mp4",
+    // "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216148375.mp4",
+    // "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216127404.mp4",
+    // "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216102250.mp4",
+    // "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216082997.mp4",
+    // "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216102250.mp4",
+    // "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771216102250.mp4",
+    "https://postkarocdn.blr1.digitaloceanspaces.com/postKaro/videos/1771826434159.mp4"
   ];
 
   @override
@@ -163,6 +164,7 @@ class _HomeState extends State<Home> {
         ///if you want reel mode, controller is not necessary
         // controller: ctrl,
         animationType: OverlayAnimationType.diagonalTopRightToBottomLeft,
+        ttsText: "बिना फल की आसक्ति के, अपने कर्तव्यों (काम) को समर्पण के साथ करना ही सच्चा कर्मयोग है।",
       ),
     );
   }
