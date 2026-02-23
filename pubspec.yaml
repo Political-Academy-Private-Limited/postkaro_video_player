@@ -2,9 +2,7 @@ name: jar_video_player
 description: A modern reels-ready customizable network video player for Flutter with lifecycle and visibility handling.
 version: 0.1.6
 
-homepage: https://github.com/sagarbisht-jarvsi/jar_video_player
-repository: https://github.com/sagarbisht-jarvsi/jar_video_player
-issue_tracker: https://github.com/sagarbisht-jarvsi/jar_video_player/issues
+repository: https://github.com/Political-Academy-Private-Limited/postkaro_video_player.git
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
