@@ -7,6 +7,7 @@ import 'package:ffmpeg_kit_flutter_new_https_gpl/ffprobe_kit.dart';
 import 'package:ffmpeg_kit_flutter_new_https_gpl/return_code.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -46,6 +47,53 @@ Future<String?> captureOverlay(GlobalKey key, String fileName) async {
     return imageFile.path;
   } catch (e) {
     rethrow;
+  }
+}
+
+///
+///convert text to tts audio
+///
+Future<String?> convertTextToSpeech(String title) async {
+  try {
+    final FlutterTts flutterTts = FlutterTts();
+
+    /// Get proper app directory
+    final Directory dir = await getApplicationDocumentsDirectory();
+    final String fileName = 'tts_${DateTime.now().millisecondsSinceEpoch}.mp3';
+    final String filePath = '${dir.path}/$fileName';
+
+    await flutterTts.setLanguage("hi-IN");
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setVolume(1.0);
+    await flutterTts.setPitch(1.0);
+    await flutterTts.awaitSynthCompletion(true);
+
+    /// Select Hindi voice (optional but kept same logic)
+    List<dynamic> voices = await flutterTts.getVoices;
+    for (var voice in voices) {
+      if (voice is Map &&
+          voice['locale'] == 'hi-IN' &&
+          voice['name'].toString().contains('x-hie')) {
+        await flutterTts.setVoice({
+          'name': voice['name'],
+          'locale': voice['locale'],
+        });
+        break;
+      }
+    }
+
+    /// IMPORTANT: pass full path here
+    await flutterTts.synthesizeToFile(title, filePath);
+
+    final file = File(filePath);
+
+    if (await file.exists()) {
+      return filePath;
+    } else {
+      return null;
+    }
+  } catch (e) {
+    return null;
   }
 }
 
@@ -112,6 +160,7 @@ Future<String?> mergeVideoWithOverlay(
   String bottomOverlayPath, {
   String? topOverlayPath,
   String? animatedOverlayPath,
+  String? audioFilePath,
   required OverlayAnimationType animationType,
 }) async {
   try {
@@ -143,29 +192,36 @@ Future<String?> mergeVideoWithOverlay(
       index++;
     }
 
-    /// Animated overlay (LIMITED by duration)
+    /// Animated overlay
     if (animatedOverlayPath != null) {
       inputs += "-loop 1 -t $duration -i \"$animatedOverlayPath\" ";
       filter += "[$index:v]scale=$videoWidth:-1[anim];";
       index++;
     }
 
+    ///  ADD AUDIO INPUT (ONLY THIS PART ADDED)
+    int? audioIndex;
+    if (audioFilePath != null) {
+      inputs += "-i \"$audioFilePath\" ";
+      audioIndex = index;
+      index++;
+    }
+
     /// ---- BASE VIDEO ----
     filter += "[0:v]setpts=PTS-STARTPTS[base];";
 
-    /// ---- APPLY BOTTOM OVERLAY FIRST ----
+    /// ---- APPLY BOTTOM OVERLAY ----
     filter += "[base][bottom]overlay=0:H-h[baseWithBottom];";
 
-    /// ---- ANIMATE ON VIDEO + BOTTOM COMBINED ----
+    /// ---- ANIMATION ----
     if (animatedOverlayPath != null) {
       final animationExpr = buildOverlayAnimation(animationType, duration);
-
       filter += "[baseWithBottom][anim]overlay=$animationExpr[animated];";
     } else {
       filter += "[baseWithBottom]copy[animated];";
     }
 
-    /// ---- APPLY TOP OVERLAY (IGNORE FOR CENTER CALCULATION) ----
+    /// ---- APPLY TOP OVERLAY ----
     if (topOverlayPath != null) {
       filter += "[top][animated]vstack=inputs=2[stacked];"
           "[stacked]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
@@ -173,17 +229,29 @@ Future<String?> mergeVideoWithOverlay(
       filter += "[animated]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
     }
 
+    ///  AUDIO MAPPING LOGIC (ONLY THIS CHANGED)
+    String audioMap;
+    String audioCodec;
+
+    if (audioFilePath != null && audioIndex != null) {
+      audioMap = "-map \"$audioIndex:a\"";
+      audioCodec = "-c:a aac -shortest";
+    } else {
+      audioMap = "-map 0:a?";
+      audioCodec = "-c:a copy";
+    }
+
     final command = "-y "
         "$inputs "
         "-filter_complex \"$filter\" "
         "-map \"[v]\" "
-        "-map 0:a? "
+        "$audioMap "
         "-c:v libx264 "
         "-preset veryfast "
         "-crf 18 "
         "-pix_fmt yuv420p "
         "-movflags +faststart "
-        "-c:a copy "
+        "$audioCodec "
         "\"$outputPath\"";
 
     final session = await FFmpegKit.execute(command);
@@ -312,8 +380,5 @@ String buildOverlayAnimation(
           "y=if(lt(t\\,$animTime)\\,"
           "main_h - (main_h)*(t/$animTime)\\,"
           "0)";
-
-
-
   }
 }

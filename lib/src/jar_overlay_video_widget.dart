@@ -146,6 +146,10 @@ class JarVideoPlayerOverlay extends StatefulWidget {
   ///
   final String? folderName;
 
+  ///this is tts text
+  ///
+  final String? ttsText;
+
   const JarVideoPlayerOverlay({
     super.key,
     required this.url,
@@ -177,6 +181,7 @@ class JarVideoPlayerOverlay extends StatefulWidget {
     this.left,
     this.spaceBwDownShare = 16,
     this.folderName,
+    this.ttsText,
   });
 
   @override
@@ -207,6 +212,7 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
         animatedOverlayKey:
             widget.animatedOverlay == null ? null : _animatedOverlayKey,
         animationType: widget.animationType,
+        ttsText: widget.ttsText,
       );
 
       if (path != null) {
@@ -264,6 +270,7 @@ class _JarVideoPlayerOverlayState extends State<JarVideoPlayerOverlay> {
         animatedOverlayKey:
             widget.animatedOverlay == null ? null : _animatedOverlayKey,
         animationType: widget.animationType,
+        ttsText: widget.ttsText,
       );
 
       if (path != null) {

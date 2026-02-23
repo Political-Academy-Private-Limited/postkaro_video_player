@@ -10,6 +10,7 @@ Future<String?> exportVideoWithOverlay({
   GlobalKey? topOverlayKey,
   GlobalKey? animatedOverlayKey,
   OverlayAnimationType? animationType,
+  String? ttsText,
 }) async {
   try {
     /// 1️⃣ Download original video
@@ -21,6 +22,12 @@ Future<String?> exportVideoWithOverlay({
 
     /// 2️⃣ Capture overlay as image
     final overlayPath = await captureOverlay(bottomOverlayKey, "bottomOverlay");
+
+    String? audioFilePath;
+
+    if (ttsText != null) {
+      audioFilePath = await convertTextToSpeech(ttsText);
+    }
 
     String? animatedOverlayPath;
 
@@ -40,18 +47,17 @@ Future<String?> exportVideoWithOverlay({
           topOverlayPath: topOverPath,
           animatedOverlayPath: animatedOverlayPath,
           animationType: animationType ?? OverlayAnimationType.none,
+          audioFilePath: audioFilePath,
         );
         return finalVideo;
       }
     } else {
       /// 3️⃣ Merge with FFmpeg
       if (videoPath != null) {
-        final finalVideo = await mergeVideoWithOverlay(
-          videoPath,
-          overlayPath!,
-          animatedOverlayPath: animatedOverlayPath,
-          animationType: animationType ?? OverlayAnimationType.none,
-        );
+        final finalVideo = await mergeVideoWithOverlay(videoPath, overlayPath!,
+            animatedOverlayPath: animatedOverlayPath,
+            animationType: animationType ?? OverlayAnimationType.none,
+            audioFilePath: audioFilePath);
         return finalVideo;
       }
     }
