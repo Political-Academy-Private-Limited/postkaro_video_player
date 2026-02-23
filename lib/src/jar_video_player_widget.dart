@@ -84,8 +84,10 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
   bool _isVisible = false;
   bool _overlayActive = false;
   bool _isActuallyPlaying = false;
-  late VoidCallback _openListener;
-  late VoidCallback _closeListener;
+  bool _isOnTopRoute = true;
+  Route<dynamic>? _ownerRoute;
+  late void Function(Route?) _openListener;
+  late void Function(Route?) _closeListener;
   @override
   @override
   void initState() {
@@ -94,13 +96,18 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
 
     _controller = widget.controller ?? JarVideoPlayerController();
     if (widget.videoRouteObserver != null) {
-      _openListener = () {
+      _openListener = (Route? routeUnderOverlay) {
+        if (routeUnderOverlay != _ownerRoute) return;
+
         _overlayActive = true;
         _safePause();
       };
 
-      _closeListener = () {
+      _closeListener = (Route? routeUnderOverlay) {
+        if (routeUnderOverlay != _ownerRoute) return;
+
         _overlayActive = false;
+
         if (widget.autoPlay || widget.reelsMode) {
           _safePlay();
         }
@@ -183,12 +190,24 @@ class _JarVideoPlayerState extends State<JarVideoPlayer>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _ownerRoute = ModalRoute.of(context);
+  }
+
+  @override
   void didPushNext() {
+    _isOnTopRoute = false;
+    log("did push next $_isOnTopRoute");
     _safePause();
   }
 
   @override
   void didPopNext() {
+    log("did pop next  $_isOnTopRoute");
+
+    _isOnTopRoute = true;
     if (widget.autoPlay || widget.reelsMode) {
       _safePlay();
     }
