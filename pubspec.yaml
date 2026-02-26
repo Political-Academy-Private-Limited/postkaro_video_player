@@ -1,0 +1,42 @@
+name: houseoftech_video_player
+
+description: A modern reels-ready customizable network video player for Flutter with lifecycle and visibility handling.
+version: 0.1.6
+
+repository: https://github.com/Political-Academy-Private-Limited/postkaro_video_player.git
+issue_tracker: https://github.com/Political-Academy-Private-Limited/postkaro_video_player/issues
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  video_player: ^2.10.1
+  visibility_detector: ^0.4.0+2
+  ffmpeg_kit_flutter_new_https_gpl: ^2.1.0
+  http: ^1.6.0
+  path_provider: ^2.1.2
+  permission_handler: ^12.0.1
+  share_plus: ^12.0.1
+  media_store_plus: ^0.1.3
+  flutter_cache_manager: ^3.4.1
+  flutter_tts: ^4.2.3
+
+
+
+
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+topics:
+  - video
+  - player
+  - reels
+  - download
+  - animated

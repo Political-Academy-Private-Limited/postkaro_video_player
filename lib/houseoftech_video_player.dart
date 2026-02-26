@@ -1,0 +1,27 @@
+/// A modern, customizable network video player for Flutter.
+///
+/// Supports:
+/// - Network video playback
+/// - Reels mode (auto play/pause on visibility)
+/// - Manual playback controls
+/// - Looping
+///
+/// Example:
+/// ```dart
+/// final controller = HouseOfTechController();
+///
+/// HouseOfTechVideoPlayer(
+///   url: "https://example.com/video.mp4",
+///   controller: controller,
+/// )
+/// ```
+
+
+library;
+
+export 'src/houseoftech_video_player_widget.dart';
+export 'helper/houseoftech_video_player_controller.dart';
+export 'src/houseoftech_overlay_video_widget.dart';
+export 'helper/overlay_animation_type.dart';
+export 'helper/blur_image.dart';
+export 'src/video_route_observer.dart';
