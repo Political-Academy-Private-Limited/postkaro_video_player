@@ -1,41 +1,7 @@
-## 0.1.5
+## 1.0.0
 
-- all features of v -> 0.1.3-beta.1
 - Added Animated overlay feature.
 - Added download of video with animated overlay feature with video share also.
 - fixed some bugs of overlay.
+- added custom video player.
 
-
-- ## 0.1.4
-
-- all features of v -> 0.1.3-beta.1
-- Added Animated overlay feature.
-- Added download of video with animated overlay feature with video share also.
-- fixed some bugs of overlay.
-## 0.1.3-beta.1
-
-- Now introducing new widget HouseOfTechVideoPlayerOverlay
-- In this now can download and share the video with custom overlay's
-- video orientation of normal mode and reel mode is changed
-- Video is downloaded or shared with both top and bottom overlay or just bottom overlay or just video only.
-- few bugs fixed
-- for now, it is in beta as it may be unstable.
-
-## 0.1.2
-
-- Make the Video Controller optional 
-- added more documentation.
-
-## 0.1.1
-
-- demo video added
-
-
-## 0.1.0
-
-- Initial public release
-- Network video playback support
-- Reels mode with autoplay/pause on visibility
-- Lifecycle aware video pause
-- Route aware auto pause
-- External controller support

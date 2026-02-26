@@ -47,7 +47,7 @@ Add the dependency to your `pubspec.yaml`:
 
 ``` yaml
 dependencies:
-  houseoftech_video_player: ^0.1.5
+  houseoftech_video_player: ^1.0.0
 ```
 
 Then run:
@@ -261,7 +261,7 @@ this package.
 
 MIT License
 
-Copyright (c) 2026 Sagar
+Copyright (c) 2026 House Of Tech
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the

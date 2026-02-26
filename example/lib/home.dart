@@ -142,7 +142,7 @@ class _HomeState extends State<Home> {
           color: Colors.red,
           width: double.infinity,
           height: 70,
-          child: Text("Hello Sagar"),
+          child: Text("Hello House Of tech"),
         ),
 
         /// these is for animated overlay
