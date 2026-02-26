@@ -128,7 +128,6 @@ class _HomeState extends State<Home> {
         downloadWithOverlay: true,
         videoRouteObserver: videoRouteObserver,
         onDownloadComplete: (success) {
-          print("downloade success");
         },
         topStripe: Container(
           color: Colors.green,
