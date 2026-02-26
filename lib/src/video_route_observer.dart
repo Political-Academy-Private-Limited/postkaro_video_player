@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 //
 // class VideoRouteObserver extends NavigatorObserver {
@@ -70,10 +68,10 @@ class VideoRouteObserver extends NavigatorObserver {
     _onOverlayCloseListeners.remove(onClose);
   }
 
-  bool _isOverlay(Route route) {
-    return route is PopupRoute ||
-        route.runtimeType.toString().contains("ModalBottomSheet");
-  }
+  // bool _isOverlay(Route route) {
+  //   return route is PopupRoute ||
+  //       route.runtimeType.toString().contains("ModalBottomSheet");
+  // }
 
   @override
   void didPush(Route route, Route? previousRoute) {
