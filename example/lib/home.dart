@@ -121,42 +121,45 @@ class _HomeState extends State<Home> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 80),
 
-      child: HotVideoPlayerOverlay(
+      child: HouseOfTechVideoPlayer(
         url: videoUrl,
         aspectRatio: 9 / 16,
         reelsMode: true,
-        downloadWithOverlay: true,
+        // downloadWithOverlay: true,
         isMute: true,
+        videoLoader: Center(
+          child: Text("place...."),
+        ),
 
         videoRouteObserver: videoRouteObserver,
-        onDownloadComplete: (success) {
-        },
-        topStripe: Container(
-          color: Colors.green,
-          width: double.infinity,
-          height: 50,
-          child: Text("Hello leaders", style: TextStyle(fontSize: 37)),
-        ),
-
-        /// these are for
-        bottomStripe: Container(
-          color: Colors.red,
-          width: double.infinity,
-          height: 70,
-          child: Text("Hello House Of tech"),
-        ),
-
-        /// these is for animated overlay
-        animatedOverlay: BlurNetworkImage(
-          url:
-              "https://as1.ftcdn.net/jpg/16/65/67/54/1000_F_1665675417_kxphTKeghxkmNfhJfx8PqQI2DevEnaG2.webp",
-          curveDepth: 30,
-          height: 120,
-        ),
-
-        ///if you want reel mode, controller is not necessary
-        // controller: ctrl,
-        animationType: OverlayAnimationType.diagonalTopRightToBottomLeft,
+        // onDownloadComplete: (success) {
+        // },
+        // topStripe: Container(
+        //   color: Colors.green,
+        //   width: double.infinity,
+        //   height: 50,
+        //   child: Text("Hello leaders", style: TextStyle(fontSize: 37)),
+        // ),
+        //
+        // /// these are for
+        // bottomStripe: Container(
+        //   color: Colors.red,
+        //   width: double.infinity,
+        //   height: 70,
+        //   child: Text("Hello House Of tech"),
+        // ),
+        //
+        // /// these is for animated overlay
+        // animatedOverlay: BlurNetworkImage(
+        //   url:
+        //       "https://as1.ftcdn.net/jpg/16/65/67/54/1000_F_1665675417_kxphTKeghxkmNfhJfx8PqQI2DevEnaG2.webp",
+        //   curveDepth: 30,
+        //   height: 120,
+        // ),
+        //
+        // ///if you want reel mode, controller is not necessary
+        // // controller: ctrl,
+        // animationType: OverlayAnimationType.diagonalTopRightToBottomLeft,
         // ttsText: "बिना फल की आसक्ति के, अपने कर्तव्यों (काम) को समर्पण के साथ करना ही सच्चा कर्मयोग है।",
       ),
     );
