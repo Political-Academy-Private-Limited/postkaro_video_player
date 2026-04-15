@@ -1,3 +1,10 @@
+## 1.1.0
+
+- new feature added:
+- Added mute/unmute video.
+- Now can add custom video placeholder.
+  - default was CircularProgressIndicator()
+
 ## 1.0.0
 
 - Added Animated overlay feature.
