@@ -87,7 +87,6 @@ class _HouseOfTechVideoPlayerState extends State<HouseOfTechVideoPlayer>
   bool _isVisible = false;
   bool _overlayActive = false;
   bool _isActuallyPlaying = false;
-  bool _isMute = false;
   Route<dynamic>? _ownerRoute;
   late void Function(Route?) _openListener;
   late void Function(Route?) _closeListener;
