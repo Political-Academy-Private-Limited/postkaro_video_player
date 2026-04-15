@@ -126,6 +126,8 @@ class _HomeState extends State<Home> {
         aspectRatio: 9 / 16,
         reelsMode: true,
         downloadWithOverlay: true,
+        isMute: true,
+
         videoRouteObserver: videoRouteObserver,
         onDownloadComplete: (success) {
         },
