@@ -31,10 +31,15 @@ class HouseOfTechVideoPlayer extends StatefulWidget {
   /// default value is 9/16
   final double? aspectRatio;
 
+  final Widget? videoLoader;
+
   /// Whether the video should loop after completion.
   ///
   /// Defaults to false.
   final bool loop;
+
+  /// Defaults to false.
+  final bool isMute;
 
   /// Enables reels-style behavior.
   ///
@@ -65,6 +70,8 @@ class HouseOfTechVideoPlayer extends StatefulWidget {
     this.aspectRatio,
     this.onStatusChanged,
     this.videoRouteObserver,
+    this.videoLoader,
+    this.isMute = false,
   });
   @override
   State<HouseOfTechVideoPlayer> createState() => _HouseOfTechVideoPlayerState();
@@ -80,6 +87,7 @@ class _HouseOfTechVideoPlayerState extends State<HouseOfTechVideoPlayer>
   bool _isVisible = false;
   bool _overlayActive = false;
   bool _isActuallyPlaying = false;
+  bool _isMute = false;
   Route<dynamic>? _ownerRoute;
   late void Function(Route?) _openListener;
   late void Function(Route?) _closeListener;
@@ -91,9 +99,7 @@ class _HouseOfTechVideoPlayerState extends State<HouseOfTechVideoPlayer>
 
     _controller = widget.controller ?? HouseOfTechController();
     if (widget.videoRouteObserver != null) {
-
       _openListener = (Route? routeUnderOverlay) {
-
         if (routeUnderOverlay != _ownerRoute) return;
         _overlayActive = true;
         _safePause();
@@ -133,6 +139,7 @@ class _HouseOfTechVideoPlayerState extends State<HouseOfTechVideoPlayer>
       await _controller.initialize(
         file.path,
         loop: widget.reelsMode ? true : widget.loop,
+        isMute: widget.isMute,
       );
 
       /// If widget was disposed or another init started, ignore
@@ -283,7 +290,7 @@ class _HouseOfTechVideoPlayerState extends State<HouseOfTechVideoPlayer>
   @override
   Widget build(BuildContext context) {
     if (_loading || !_controller.isInitialized) {
-      return const Center(child: CircularProgressIndicator());
+      return widget.videoLoader ?? Center(child: CircularProgressIndicator());
     }
 
     final vc = _controller.videoController;

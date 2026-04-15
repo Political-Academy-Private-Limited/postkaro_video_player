@@ -72,6 +72,10 @@ class HotVideoPlayerOverlay extends StatefulWidget {
   /// If true, the video restarts automatically.
   final bool loop;
 
+  ///default is false
+  ///you can mute/unmute a video
+  final bool isMute;
+
   /// The aspect ratio of the video player.
   ///
   /// Defaults to 9/16 for reels.
@@ -182,6 +186,7 @@ class HotVideoPlayerOverlay extends StatefulWidget {
     this.spaceBwDownShare = 16,
     this.folderName,
     this.ttsText,
+    this.isMute = false,
   });
 
   @override
@@ -316,6 +321,7 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
                   reelsMode: widget.reelsMode,
                   autoPlay: widget.autoPlay,
                   loop: widget.loop,
+                  isMute: widget.isMute,
                   videoRouteObserver: widget.videoRouteObserver,
 
                   ///

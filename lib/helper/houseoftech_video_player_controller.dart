@@ -29,6 +29,7 @@ class HouseOfTechController {
     String url, {
     bool autoPlay = false,
     bool loop = false,
+        bool isMute = false,
   }) async {
     /// Dispose old controller if exists
     await disposeVideo();
@@ -42,8 +43,13 @@ class HouseOfTechController {
       await _videoController!.initialize();
       await _videoController!.setLooping(loop);
 
+
+
       if (autoPlay) {
         await _videoController!.play();
+      }
+      if (isMute) {
+        await _videoController!.setVolume(0);
       }
     } catch (e) {
       /// fallback to network if cache fails
