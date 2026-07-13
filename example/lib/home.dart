@@ -164,7 +164,8 @@ class _HomeState extends State<Home> {
 
         ///if you want reel mode, controller is not necessary
         // controller: ctrl,
-        // ttsText: "बिना फल की आसक्ति के, अपने कर्तव्यों (काम) को समर्पण के साथ करना ही सच्चा कर्मयोग है।",
+        ttsText:
+            "बिना फल की आसक्ति के, अपने कर्तव्यों (काम) को समर्पण के साथ करना ही सच्चा कर्मयोग है।",
       ),
     );
   }

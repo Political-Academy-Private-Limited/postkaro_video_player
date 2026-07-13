@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:houseoftech_video_player/helper/utils.dart';
 
@@ -15,60 +13,50 @@ Future<String?> exportVideoWithOverlay({
   String? ttsText,
 }) async {
   try {
-    /// 1️⃣ Download original video
     final videoPath = await downloadVideo(videoUrl);
+
+    if (videoPath == null) {
+      return null;
+    }
 
     if (!downloadWithOverlay) {
       return videoPath;
     }
 
-    /// 2️⃣ Capture overlay as image
     final overlayPath = await captureOverlay(bottomOverlayKey, "bottomOverlay");
 
+    if (overlayPath == null) {
+      return null;
+    }
+
     String? audioFilePath;
-
-    if (ttsText != null) {
+    if (ttsText != null && ttsText.trim().isNotEmpty) {
       audioFilePath = await convertTextToSpeech(ttsText);
-      log(audioFilePath.toString());
-    }
-    log(audioFilePath?.isEmpty.toString() ?? "no tts file");
-    String? animatedOverlayPath;
-
-    if (animatedOverlayKey != null) {
-      animatedOverlayPath =
-          await captureOverlay(animatedOverlayKey, "animatedOverlay");
     }
 
-    if (topOverlayKey != null) {
-      final topOverPath = await captureOverlay(topOverlayKey, "topOverlay");
+    final results = await Future.wait<String?>([
+      topOverlayKey != null
+          ? captureOverlay(topOverlayKey, "topOverlay")
+          : Future.value(null),
+      animatedOverlayKey != null
+          ? captureOverlay(animatedOverlayKey, "animatedOverlay")
+          : Future.value(null),
+    ]);
 
-      /// 3️⃣ Merge with FFmpeg both top and bottom overlay
-      if (videoPath != null) {
-        final finalVideo = await mergeVideoWithOverlay(
-          videoPath,
-          overlayPath!,
-          topOverlayPath: topOverPath,
-          animatedOverlayPath: animatedOverlayPath,
-          animationData: animationType,
-          audioFilePath: audioFilePath,
-        );
-        return finalVideo;
-      }
-    } else {
-      /// 3️⃣ Merge with FFmpeg
-      if (videoPath != null) {
-        final finalVideo = await mergeVideoWithOverlay(
-          videoPath,
-          overlayPath!,
-          animatedOverlayPath: animatedOverlayPath,
-          animationData: animationType,
-          audioFilePath: audioFilePath,
-        );
-        return finalVideo;
-      }
-    }
+    final topOverlayPath = results[0];
+    final animatedOverlayPath = results[1];
+
+    final finalVideo = await mergeVideoWithOverlay(
+      videoPath,
+      overlayPath,
+      topOverlayPath: topOverlayPath,
+      animatedOverlayPath: animatedOverlayPath,
+      animationData: animationType,
+      audioFilePath: audioFilePath,
+    );
+
+    return finalVideo;
   } catch (e) {
     return null;
   }
-  return null;
 }
