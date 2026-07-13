@@ -151,8 +151,8 @@ class _HomeState extends State<Home> {
         /// these is for animated overlay
         /// todo
         animationData: OverlayAnimation(
-          start: OverlayPosition.topLeft,
-          end: OverlayPosition.center,
+          start: OverlayPosition.topRight,
+          end: OverlayPosition.bottomLeft,
           duration: Duration(milliseconds: 5000),
         ),
         animatedOverlay: BlurNetworkImage(

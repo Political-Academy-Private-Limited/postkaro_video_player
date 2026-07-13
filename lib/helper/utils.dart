@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -167,6 +168,41 @@ Future<Map<String, int>?> getVideoResolution(String path) async {
   }
 }
 
+Future<double?> getVideoDuration(String path) async {
+  try {
+    final session = await FFprobeKit.execute(
+      '-v error -show_entries format=duration '
+      '-of default=noprint_wrappers=1:nokey=1 "$path"',
+    );
+
+    final output = await session.getOutput();
+
+    if (output == null || output.trim().isEmpty) return null;
+
+    return double.tryParse(output.trim());
+  } catch (_) {
+    return null;
+  }
+}
+
+/// ===============================
+/// SHARE VIDEO
+/// ===============================
+///
+
+Future<void> shareVideo(String path) async {
+  final params = ShareParams(
+    text: 'Great picture',
+    files: [
+      XFile(
+        path,
+        mimeType: "video/mp4",
+      )
+    ],
+  );
+  await SharePlus.instance.share(params);
+}
+
 /// ===============================
 /// MERGE VIDEO + OVERLAY (Optimal)
 /// ===============================
@@ -213,8 +249,7 @@ Future<String?> mergeVideoWithOverlay(
     if (animatedOverlayPath != null) {
       inputs += "-loop 1 -t $duration -i \"$animatedOverlayPath\" ";
       filter += "[$index:v]scale=$videoWidth:-1[anim];";
-      // filter += "[$index:v]copy[anim];";/
-      // filter += "[$index:v]format=rgba[anim];";
+
       index++;
     }
 
@@ -236,6 +271,8 @@ Future<String?> mergeVideoWithOverlay(
     if (animatedOverlayPath != null) {
       final animationExpr =
           buildCustomAnimation(animData: animationData, resolution: resolution);
+      log("final command $animationExpr");
+
       filter += "[baseWithBottom][anim]overlay=$animationExpr[animated];";
     } else {
       filter += "[baseWithBottom]copy[animated];";
@@ -285,41 +322,6 @@ Future<String?> mergeVideoWithOverlay(
   } catch (e) {
     rethrow;
   }
-}
-
-Future<double?> getVideoDuration(String path) async {
-  try {
-    final session = await FFprobeKit.execute(
-      '-v error -show_entries format=duration '
-      '-of default=noprint_wrappers=1:nokey=1 "$path"',
-    );
-
-    final output = await session.getOutput();
-
-    if (output == null || output.trim().isEmpty) return null;
-
-    return double.tryParse(output.trim());
-  } catch (_) {
-    return null;
-  }
-}
-
-/// ===============================
-/// SHARE VIDEO
-/// ===============================
-///
-
-Future<void> shareVideo(String path) async {
-  final params = ShareParams(
-    text: 'Great picture',
-    files: [
-      XFile(
-        path,
-        mimeType: "video/mp4",
-      )
-    ],
-  );
-  await SharePlus.instance.share(params);
 }
 
 ///
@@ -378,18 +380,6 @@ String startY(double value) {
   return "main_h";
 }
 
-// String endX(double value, int videoWidth) {
-//   if (value == 0) return "0";
-//   if (value == .5) return "${videoWidth / 2}-overlay_w/2";
-//   return "$videoWidth-overlay_w";
-// }
-//
-// String endY(double value, int videoHeight) {
-//   if (value == 0) return "0";
-//   if (value == .5) return "${videoHeight / 2}-overlay_h/2";
-//   return "$videoHeight-overlay_h";
-// }
-
 String endX(double value) {
   if (value == 0) return "0";
   if (value == .5) return "main_w/2-overlay_w/2";
@@ -408,22 +398,17 @@ String buildCustomAnimation({
 }) {
   final start = getPosition(animData.start);
   final end = getPosition(animData.end);
+  final duration = animData.duration.inMilliseconds / 1000.0;
 
-  final sec = animData.duration.inMilliseconds / 1000.0;
-  final progress = "if(lt(t\\,$sec)\\,(t/$sec)\\,1)";
-
-  final int videoWidth = resolution['width']!;
-  final int videoHeight = resolution['height']!;
+  final progress = "if(lt(t\\,$duration)\\,"
+      "(3*(t/$duration)*(t/$duration)-2*(t/$duration)*(t/$duration)*(t/$duration))"
+      "\\,1)";
   final sx = startX(start.x);
   final sy = startY(start.y);
 
   final ex = endX(end.x);
   final ey = endY(end.y);
 
-  // final ex = endX(end.x, videoWidth);
-  // final ey = endY(end.y, videoHeight);
-
-  return ""
-      "x=(($sx)+(($ex)-($sx))*($progress)):"
-      "y=(($sy)+(($ey)-($sy))*($progress))";
+  return "x=($sx)+(($ex)-($sx))*($progress):"
+      "y=($sy)+(($ey)-($sy))*($progress)";
 }
