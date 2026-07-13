@@ -1,3 +1,10 @@
+## 1.1.1
+- animated overlay fixed.
+- now animated overlay supports all the animation type.
+- now download/share with animated overlay added.
+- bug fixes
+
+
 ## 1.1.0
 
 - new feature added:
