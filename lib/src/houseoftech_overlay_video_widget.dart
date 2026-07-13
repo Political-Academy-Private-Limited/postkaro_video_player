@@ -79,6 +79,7 @@ class HotVideoPlayerOverlay extends StatefulWidget {
   ///this is for showing place holder when video is loading
   ///
   final Widget? videoLoader;
+
   /// The aspect ratio of the video player.
   ///
   /// Defaults to 9/16 for reels.
@@ -110,7 +111,7 @@ class HotVideoPlayerOverlay extends StatefulWidget {
   /// when an widget will start animation and
   /// end the animation
   ///
-  final OverlayAnimationType? animationType;
+  final OverlayAnimation? animationData;
 
   ///
   ///custom progress indicator when video is being downloaded
@@ -176,7 +177,7 @@ class HotVideoPlayerOverlay extends StatefulWidget {
     this.downloadBackgroundColor,
     this.shareBackgroundColor,
     this.animatedOverlay,
-    this.animationType,
+    this.animationData,
     this.shareDownloadProgressIndicator,
     this.downloadWithOverlay = false,
     this.onStatusChanged,
@@ -219,8 +220,12 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
         downloadWithOverlay: widget.downloadWithOverlay,
         topOverlayKey: widget.topStripe == null ? null : _topOverlayKey,
         animatedOverlayKey:
-        widget.animatedOverlay == null ? null : _animatedOverlayKey,
-        animationType: widget.animationType,
+            widget.animatedOverlay == null ? null : _animatedOverlayKey,
+        animationType: widget.animationData ??
+            OverlayAnimation(
+                start: OverlayPosition.bottomLeft,
+                end: OverlayPosition.bottomLeft,
+                duration: Duration(milliseconds: 200)),
         ttsText: widget.ttsText,
       );
 
@@ -277,8 +282,12 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
         downloadWithOverlay: widget.bottomStripe != null,
         topOverlayKey: widget.topStripe == null ? null : _topOverlayKey,
         animatedOverlayKey:
-        widget.animatedOverlay == null ? null : _animatedOverlayKey,
-        animationType: widget.animationType,
+            widget.animatedOverlay == null ? null : _animatedOverlayKey,
+        animationType: widget.animationData ??
+            OverlayAnimation(
+                start: OverlayPosition.bottomLeft,
+                end: OverlayPosition.bottomLeft,
+                duration: Duration(milliseconds: 200)),
         ttsText: widget.ttsText,
       );
 
@@ -363,11 +372,25 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
                 RepaintBoundary(
                   key: _animatedOverlayKey,
                   child: AnimationWidget(
+                    animationType: widget.animationData ??
+                        const OverlayAnimation(
+                          start: OverlayPosition.bottomLeft,
+                          end: OverlayPosition.bottomLeft,
+                          duration: Duration(milliseconds: 200),
+                        ),
                     animatedOverlay: widget.animatedOverlay!,
-                    animationType:
-                    widget.animationType ?? OverlayAnimationType.none,
                   ),
                 ),
+              // AnimationWidget(
+              //   animationType: widget.animationData ??
+              //       const OverlayAnimation(
+              //         start: OverlayPosition.bottomLeft,
+              //         end: OverlayPosition.bottomLeft,
+              //         duration: Duration(milliseconds: 200),
+              //       ),
+              //   animatedOverlay: RepaintBoundary(
+              //       key: _animatedOverlayKey, child: widget.animatedOverlay!),
+              // ),
 
               /// Buttons (center right)
               Positioned(

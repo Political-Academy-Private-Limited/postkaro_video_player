@@ -11,7 +11,7 @@ Future<String?> exportVideoWithOverlay({
   required GlobalKey bottomOverlayKey,
   GlobalKey? topOverlayKey,
   GlobalKey? animatedOverlayKey,
-  OverlayAnimationType? animationType,
+  required OverlayAnimation animationType,
   String? ttsText,
 }) async {
   try {
@@ -49,7 +49,7 @@ Future<String?> exportVideoWithOverlay({
           overlayPath!,
           topOverlayPath: topOverPath,
           animatedOverlayPath: animatedOverlayPath,
-          animationType: animationType ?? OverlayAnimationType.none,
+          animationData: animationType,
           audioFilePath: audioFilePath,
         );
         return finalVideo;
@@ -61,7 +61,7 @@ Future<String?> exportVideoWithOverlay({
           videoPath,
           overlayPath!,
           animatedOverlayPath: animatedOverlayPath,
-          animationType: animationType ?? OverlayAnimationType.none,
+          animationData: animationType,
           audioFilePath: audioFilePath,
         );
         return finalVideo;

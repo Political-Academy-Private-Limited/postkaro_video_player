@@ -17,6 +17,7 @@ import 'overlay_animation_type.dart';
 /// ===============================
 /// CAPTURE OVERLAY (High Quality)
 /// ===============================
+///
 Future<String?> captureOverlay(GlobalKey key, String fileName) async {
   try {
     if (key.currentContext == null) {
@@ -176,7 +177,7 @@ Future<String?> mergeVideoWithOverlay(
   String? topOverlayPath,
   String? animatedOverlayPath,
   String? audioFilePath,
-  required OverlayAnimationType animationType,
+  required OverlayAnimation animationData,
 }) async {
   try {
     final dir = await getTemporaryDirectory();
@@ -184,6 +185,7 @@ Future<String?> mergeVideoWithOverlay(
         "${dir.path}/final_${DateTime.now().millisecondsSinceEpoch}.mp4";
 
     final resolution = await getVideoResolution(videoPath);
+
     if (resolution == null) return null;
 
     final duration = await getVideoDuration(videoPath);
@@ -211,6 +213,8 @@ Future<String?> mergeVideoWithOverlay(
     if (animatedOverlayPath != null) {
       inputs += "-loop 1 -t $duration -i \"$animatedOverlayPath\" ";
       filter += "[$index:v]scale=$videoWidth:-1[anim];";
+      // filter += "[$index:v]copy[anim];";/
+      // filter += "[$index:v]format=rgba[anim];";
       index++;
     }
 
@@ -230,7 +234,8 @@ Future<String?> mergeVideoWithOverlay(
 
     /// ---- ANIMATION ----
     if (animatedOverlayPath != null) {
-      final animationExpr = buildOverlayAnimation(animationType, duration);
+      final animationExpr =
+          buildCustomAnimation(animData: animationData, resolution: resolution);
       filter += "[baseWithBottom][anim]overlay=$animationExpr[animated];";
     } else {
       filter += "[baseWithBottom]copy[animated];";
@@ -247,14 +252,6 @@ Future<String?> mergeVideoWithOverlay(
     ///  AUDIO MAPPING LOGIC (ONLY THIS CHANGED)
     String audioMap;
     String audioCodec;
-
-    // if (audioFilePath != null && audioIndex != null) {
-    //   audioMap = "-map $audioIndex:0";
-    //   audioCodec = "-c:a aac -shortest";
-    // } else {
-    //   audioMap = "-map 0:a?";
-    //   audioCodec = "-c:a copy";
-    // }
 
     if (audioFilePath != null && audioIndex != null) {
       audioMap = "-map $audioIndex:0";
@@ -328,84 +325,105 @@ Future<void> shareVideo(String path) async {
 ///
 /// Custom animation merger
 ///
-String buildOverlayAnimation(
-  OverlayAnimationType type,
-  double duration,
-) {
-  const animTime = 2;
 
-  switch (type) {
-    case OverlayAnimationType.none:
-      return "x=(main_w-overlay_w)/3:"
-          "y=(main_h-overlay_h)/3";
+class OverlayPoint {
+  final double x;
+  final double y;
 
-    case OverlayAnimationType.topCenter:
-      return "x=(main_w-overlay_w)/2:"
-          "y=0";
+  const OverlayPoint(this.x, this.y);
+}
 
-    case OverlayAnimationType.topToCenter:
-      return "x=(main_w-overlay_w)/2:"
-          "y=if(lt(t\\,$animTime)\\,"
-          "-overlay_h + ((main_h-overlay_h)/2 + overlay_h)*(t/$animTime)\\,"
-          "(main_h-overlay_h)/2)";
+OverlayPoint getPosition(OverlayPosition pos) {
+  switch (pos) {
+    case OverlayPosition.topLeft:
+      return const OverlayPoint(0, 0);
 
-    case OverlayAnimationType.bottomToCenter:
-      return "x=(main_w-overlay_w)/2:"
-          "y=if(lt(t\\,$animTime)\\,"
-          "main_h - (main_h-(main_h-overlay_h)/2)*(t/$animTime)\\,"
-          "(main_h-overlay_h)/2)";
+    case OverlayPosition.topCenter:
+      return const OverlayPoint(.5, 0);
 
-    case OverlayAnimationType.leftToRight:
-      return "x=if(lt(t\\,$animTime)\\,"
-          "-overlay_w + ((main_w-overlay_w)/2 + overlay_w)*(t/$animTime)\\,"
-          "(main_w-overlay_w)/2):"
-          "y=(main_h-overlay_h)/2";
+    case OverlayPosition.topRight:
+      return const OverlayPoint(1, 0);
 
-    case OverlayAnimationType.rightToLeft:
-      return "x=if(lt(t\\,$animTime)\\,"
-          "main_w - (main_w-(main_w-overlay_w)/2)*(t/$animTime)\\,"
-          "(main_w-overlay_w)/2):"
-          "y=(main_h-overlay_h)/2";
+    case OverlayPosition.centerLeft:
+      return const OverlayPoint(0, .5);
 
-    case OverlayAnimationType.diagonalTopLeftToBottomRight:
-      return "x=if(lt(t\\,$animTime)\\,"
-          "-overlay_w + ((main_w-overlay_w)/2 + overlay_w)*(t/$animTime)\\,"
-          "(main_w-overlay_w)/2):"
-          "y=if(lt(t\\,$animTime)\\,"
-          "-overlay_h + ((main_h-overlay_h)/2 + overlay_h)*(t/$animTime)\\,"
-          "(main_h-overlay_h)/2)";
-    case OverlayAnimationType.leftToCenter:
-      return "x=if(lt(t\\,$animTime)\\,"
-          "-overlay_w + ((main_w-overlay_w)/2 + overlay_w)*(t/$animTime)\\,"
-          "(main_w-overlay_w)/2):"
-          "y=(main_h-overlay_h)/2";
+    case OverlayPosition.center:
+      return const OverlayPoint(.5, .5);
 
-    case OverlayAnimationType.rightToCenter:
-      return "x=if(lt(t\\,$animTime)\\,"
-          "main_w - (main_w-(main_w-overlay_w)/2)*(t/$animTime)\\,"
-          "(main_w-overlay_w)/2):"
-          "y=(main_h-overlay_h)/2";
+    case OverlayPosition.centerRight:
+      return const OverlayPoint(1, .5);
 
-    case OverlayAnimationType.diagonalTopRightToBottomLeft:
-      return "x=if(lt(t\\,$animTime)\\,"
-          "main_w - (main_w-(main_w-overlay_w)/2)*(t/$animTime)\\,"
-          "(main_w-overlay_w)/2):"
-          "y=if(lt(t\\,$animTime)\\,"
-          "-overlay_h + ((main_h-overlay_h)/2 + overlay_h)*(t/$animTime)\\,"
-          "(main_h-overlay_h)/2)";
-    case OverlayAnimationType.diagonalBottomLeftToTopRight:
-      return "x=if(lt(t\\,$animTime)\\,"
-          "-overlay_w + ((main_w-overlay_w)/2 + overlay_w)*(t/$animTime)\\,"
-          "(main_w-overlay_w)/2):"
-          "y=if(lt(t\\,$animTime)\\,"
-          "main_h - (main_h-(main_h-overlay_h)/2)*(t/$animTime)\\,"
-          "(main_h-overlay_h)/2)";
-    case OverlayAnimationType.diagonalBottomRightToTopLeft:
-      return "x=if(lt(t\\,$animTime)\\,"
-          "main_w - (main_w)*(t/$animTime)\\,"
-          "0):"
-          "y=if(lt(t\\,$animTime)\\,"
-          "main_h - (main_h)*(t/$animTime)\\,"
-          "0)";
+    case OverlayPosition.bottomLeft:
+      return const OverlayPoint(0, 1);
+
+    case OverlayPosition.bottomCenter:
+      return const OverlayPoint(.5, 1);
+
+    case OverlayPosition.bottomRight:
+      return const OverlayPoint(1, 1);
   }
+}
+
+///new logic
+
+String startX(double value) {
+  if (value == 0) return "-overlay_w";
+  if (value == .5) return "main_w/2-overlay_w/2";
+  return "main_w";
+}
+
+String startY(double value) {
+  if (value == 0) return "-overlay_h";
+  if (value == .5) return "main_h/2-overlay_h/2";
+  return "main_h";
+}
+
+// String endX(double value, int videoWidth) {
+//   if (value == 0) return "0";
+//   if (value == .5) return "${videoWidth / 2}-overlay_w/2";
+//   return "$videoWidth-overlay_w";
+// }
+//
+// String endY(double value, int videoHeight) {
+//   if (value == 0) return "0";
+//   if (value == .5) return "${videoHeight / 2}-overlay_h/2";
+//   return "$videoHeight-overlay_h";
+// }
+
+String endX(double value) {
+  if (value == 0) return "0";
+  if (value == .5) return "main_w/2-overlay_w/2";
+  return "main_w-overlay_w";
+}
+
+String endY(double value) {
+  if (value == 0) return "0";
+  if (value == .5) return "main_h/2-overlay_h/2";
+  return "main_h-overlay_h";
+}
+
+String buildCustomAnimation({
+  required OverlayAnimation animData,
+  required resolution,
+}) {
+  final start = getPosition(animData.start);
+  final end = getPosition(animData.end);
+
+  final sec = animData.duration.inMilliseconds / 1000.0;
+  final progress = "if(lt(t\\,$sec)\\,(t/$sec)\\,1)";
+
+  final int videoWidth = resolution['width']!;
+  final int videoHeight = resolution['height']!;
+  final sx = startX(start.x);
+  final sy = startY(start.y);
+
+  final ex = endX(end.x);
+  final ey = endY(end.y);
+
+  // final ex = endX(end.x, videoWidth);
+  // final ey = endY(end.y, videoHeight);
+
+  return ""
+      "x=(($sx)+(($ex)-($sx))*($progress)):"
+      "y=(($sy)+(($ey)-($sy))*($progress))";
 }

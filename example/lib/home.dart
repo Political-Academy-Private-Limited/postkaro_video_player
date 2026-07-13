@@ -18,8 +18,10 @@ class _HomeState extends State<Home> {
   late List<bool> isVideoPage;
 
   final List<String> videoUrls = <String>[
-    "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4",
-    "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+    "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407",
+    "http://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/54286548113597547617",
+    "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/56949588480660426430",
+    "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/63671731050165849607",
   ];
 
   @override
@@ -127,13 +129,10 @@ class _HomeState extends State<Home> {
         reelsMode: true,
         downloadWithOverlay: true,
         isMute: true,
-        videoLoader: Center(
-          child: Text("place...."),
-        ),
+        videoLoader: Center(child: Text("place....")),
 
         videoRouteObserver: videoRouteObserver,
-        onDownloadComplete: (success) {
-        },
+        onDownloadComplete: (success) {},
         topStripe: Container(
           color: Colors.green,
           width: double.infinity,
@@ -150,6 +149,12 @@ class _HomeState extends State<Home> {
         ),
 
         /// these is for animated overlay
+        /// todo
+        animationData: OverlayAnimation(
+          start: OverlayPosition.topLeft,
+          end: OverlayPosition.center,
+          duration: Duration(milliseconds: 5000),
+        ),
         animatedOverlay: BlurNetworkImage(
           url:
               "https://as1.ftcdn.net/jpg/16/65/67/54/1000_F_1665675417_kxphTKeghxkmNfhJfx8PqQI2DevEnaG2.webp",
@@ -159,7 +164,6 @@ class _HomeState extends State<Home> {
 
         ///if you want reel mode, controller is not necessary
         // controller: ctrl,
-        animationType: OverlayAnimationType.diagonalTopRightToBottomLeft,
         // ttsText: "बिना फल की आसक्ति के, अपने कर्तव्यों (काम) को समर्पण के साथ करना ही सच्चा कर्मयोग है।",
       ),
     );

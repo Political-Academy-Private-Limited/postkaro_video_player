@@ -16,3 +16,30 @@ enum OverlayAnimationType {
   diagonalBottomLeftToTopRight,
   diagonalBottomRightToTopLeft,
 }
+
+///this are types of start/end position
+enum OverlayPosition {
+  topLeft,
+  topCenter,
+  topRight,
+
+  centerLeft,
+  center,
+  centerRight,
+
+  bottomLeft,
+  bottomCenter,
+  bottomRight,
+}
+
+class OverlayAnimation {
+  final OverlayPosition start;
+  final OverlayPosition end;
+  final Duration duration;
+
+  const OverlayAnimation({
+    required this.start,
+    required this.end,
+    required this.duration,
+  });
+}
