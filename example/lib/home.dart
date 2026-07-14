@@ -150,16 +150,24 @@ class _HomeState extends State<Home> {
 
         /// these is for animated overlay
         animationData: OverlayAnimationData(
-          startOffset: Offset(1, 1),
-          endOffset: Offset(.5, .5),
+          startOffset: Offset(0.4900558064236405, 00.7541028551084328),
+          endOffset: Offset(00.49123784904799783, 00.2431156097164068),
           duration: Duration(milliseconds: 5000),
         ),
 
-        animatedOverlay: BlurNetworkImage(
-          url:
-              "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
-          curveDepth: 30,
-          height: 120,
+        //this is for correct dimensions
+        animatedOverlay: LayoutBuilder(
+          builder: (context, constraints) {
+            return BlurNetworkImage(
+              url:
+                  "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
+              curveDepth: 30,
+
+              // Convert normalized values to pixels
+              width: constraints.maxWidth * 00.5632823604868059,
+              height: constraints.maxHeight * 00.1564673223574461,
+            );
+          },
         ),
 
         ///if you want reel mode, controller is not necessary
