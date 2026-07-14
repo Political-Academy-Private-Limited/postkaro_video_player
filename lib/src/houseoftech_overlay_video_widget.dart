@@ -223,8 +223,8 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
             widget.animatedOverlay == null ? null : _animatedOverlayKey,
         animationType: widget.animationData ??
             OverlayAnimationData(
-                start: Offset(1, 0),
-                end: Offset(1, 0),
+                startOffset: Offset(1, 0),
+                endOffset: Offset(1, 0),
                 duration: Duration(milliseconds: 200)),
         ttsText: widget.ttsText,
       );
@@ -285,8 +285,8 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
             widget.animatedOverlay == null ? null : _animatedOverlayKey,
         animationType: widget.animationData ??
             OverlayAnimationData(
-                start: Offset(1, 0),
-                end: Offset(1, 0),
+                startOffset: Offset(1, 0),
+                endOffset: Offset(1, 0),
                 duration: Duration(milliseconds: 200)),
         ttsText: widget.ttsText,
       );
@@ -377,8 +377,8 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
                         child: AnimationWidget(
                           animationType: widget.animationData ??
                               const OverlayAnimationData(
-                                start: Offset(1, 0),
-                                end: Offset(1, 0),
+                                startOffset: Offset(1, 0),
+                                endOffset: Offset(1, 0),
                                 duration: Duration(milliseconds: 200),
                               ),
                           width: constraints.maxWidth,

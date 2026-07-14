@@ -27,8 +27,8 @@ class _AnimationWidgetState extends State<AnimationWidget> {
     super.initState();
 
     _alignment = Alignment(
-      widget.animationType.start.dx * 2 - 1,
-      widget.animationType.start.dy * 2 - 1,
+      widget.animationType.startOffset.dx * 2 - 1,
+      widget.animationType.startOffset.dy * 2 - 1,
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -36,8 +36,8 @@ class _AnimationWidgetState extends State<AnimationWidget> {
 
       setState(() {
         _alignment = Alignment(
-          widget.animationType.end.dx * 2 - 1,
-          widget.animationType.end.dy * 2 - 1,
+          widget.animationType.endOffset.dx * 2 - 1,
+          widget.animationType.endOffset.dy * 2 - 1,
         );
       });
     });
@@ -50,8 +50,8 @@ class _AnimationWidgetState extends State<AnimationWidget> {
     if (oldWidget.animationType != widget.animationType) {
       setState(() {
         _alignment = Alignment(
-          widget.animationType.start.dx * 2 - 1,
-          widget.animationType.start.dy * 2 - 1,
+          widget.animationType.startOffset.dx * 2 - 1,
+          widget.animationType.startOffset.dy * 2 - 1,
         );
       });
 
@@ -60,8 +60,8 @@ class _AnimationWidgetState extends State<AnimationWidget> {
 
         setState(() {
           _alignment = Alignment(
-            widget.animationType.end.dx * 2 - 1,
-            widget.animationType.end.dy * 2 - 1,
+            widget.animationType.endOffset.dx * 2 - 1,
+            widget.animationType.endOffset.dy * 2 - 1,
           );
         });
       });

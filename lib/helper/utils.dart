@@ -364,8 +364,8 @@ String buildCustomAnimation({
   required OverlayAnimationData animData,
   required resolution,
 }) {
-  final start = animData.start;
-  final end = animData.end;
+  final start = animData.startOffset;
+  final end = animData.endOffset;
   final duration = animData.duration.inMilliseconds / 1000.0;
 
   final progress = "if(lt(t\\,$duration)\\,"

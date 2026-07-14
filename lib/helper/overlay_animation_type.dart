@@ -35,13 +35,17 @@ enum OverlayPosition {
 }
 
 class OverlayAnimationData {
-  final Offset start;
-  final Offset end;
+  final Offset startOffset;
+  final Offset endOffset;
+
+  ///duration will always be milliseconds.
+  ///if you need 5 sec of animation from start to end
+  ///use milliseconds: 5000 not seconds: 5
   final Duration duration;
 
   const OverlayAnimationData({
-    required this.start,
-    required this.end,
+    required this.startOffset,
+    required this.endOffset,
     required this.duration,
   });
 }

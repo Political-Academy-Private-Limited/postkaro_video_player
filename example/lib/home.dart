@@ -150,14 +150,14 @@ class _HomeState extends State<Home> {
 
         /// these is for animated overlay
         animationData: OverlayAnimationData(
-          start: Offset(1, 1),
-          end: Offset(.5, .5),
+          startOffset: Offset(1, 1),
+          endOffset: Offset(.5, .5),
           duration: Duration(milliseconds: 5000),
         ),
 
         animatedOverlay: BlurNetworkImage(
           url:
-              "https://as1.ftcdn.net/jpg/16/65/67/54/1000_F_1665675417_kxphTKeghxkmNfhJfx8PqQI2DevEnaG2.webp",
+              "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
           curveDepth: 30,
           height: 120,
         ),
