@@ -206,10 +206,126 @@ Future<void> shareVideo(String path) async {
 /// ===============================
 /// MERGE VIDEO + OVERLAY (Optimal)
 /// ===============================
+//
+// Future<String?> mergeVideoWithOverlay(
+//   String videoPath,
+//   String bottomOverlayPath, {
+//   String? topOverlayPath,
+//   String? animatedOverlayPath,
+//   String? audioFilePath,
+//   required OverlayAnimationData animationData,
+// }) async {
+//   try {
+//     final dir = await getTemporaryDirectory();
+//     final outputPath =
+//         "${dir.path}/final_${DateTime.now().millisecondsSinceEpoch}.mp4";
+//
+//     final resolution = await getVideoResolution(videoPath);
+//
+//     if (resolution == null) return null;
+//
+//     final duration = await getVideoDuration(videoPath);
+//     if (duration == null) return null;
+//
+//     final int videoWidth = resolution['width']!;
+//
+//     String inputs = "-i \"$videoPath\" ";
+//     String filter = "";
+//     int index = 1;
+//
+//     /// Bottom overlay
+//     inputs += "-i \"$bottomOverlayPath\" ";
+//     filter += "[$index:v]scale=$videoWidth:-1[bottom];";
+//     index++;
+//
+//     /// Top overlay
+//     if (topOverlayPath != null) {
+//       inputs += "-i \"$topOverlayPath\" ";
+//       filter += "[$index:v]scale=$videoWidth:-1[top];";
+//       index++;
+//     }
+//
+//     /// Animated overlay
+//     if (animatedOverlayPath != null) {
+//       inputs += "-loop 1 -t $duration -i \"$animatedOverlayPath\" ";
+//       filter += "[$index:v]scale=$videoWidth:-1[anim];";
+//
+//       index++;
+//     }
+//
+//     ///  ADD AUDIO INPUT (ONLY THIS PART ADDED)
+//     int? audioIndex;
+//     if (audioFilePath != null) {
+//       inputs += "-i \"$audioFilePath\" ";
+//       audioIndex = index;
+//       index++;
+//     }
+//
+//     /// ---- BASE VIDEO ----
+//     filter += "[0:v]setpts=PTS-STARTPTS[base];";
+//
+//     /// ---- APPLY BOTTOM OVERLAY ----
+//     filter += "[base][bottom]overlay=0:H-h[baseWithBottom];";
+//
+//     /// ---- ANIMATION ----
+//     if (animatedOverlayPath != null) {
+//       final animationExpr =
+//           buildCustomAnimation(animData: animationData, resolution: resolution);
+//
+//       filter += "[baseWithBottom][anim]overlay=$animationExpr[animated];";
+//     } else {
+//       filter += "[baseWithBottom]copy[animated];";
+//     }
+//
+//     /// ---- APPLY TOP OVERLAY ----
+//     if (topOverlayPath != null) {
+//       filter += "[top][animated]vstack=inputs=2[stacked];"
+//           "[stacked]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
+//     } else {
+//       filter += "[animated]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
+//     }
+//
+//     ///  AUDIO MAPPING LOGIC (ONLY THIS CHANGED)
+//     String audioMap;
+//     String audioCodec;
+//
+//     if (audioFilePath != null && audioIndex != null) {
+//       audioMap = "-map $audioIndex:0";
+//       audioCodec = "-c:a aac -t $duration";
+//     } else {
+//       audioMap = "-map 0:a?";
+//       audioCodec = "-c:a copy";
+//     }
+//
+//     final command = "-y "
+//         "$inputs "
+//         "-filter_complex \"$filter\" "
+//         "-map \"[v]\" "
+//         "$audioMap "
+//         "-c:v libx264 "
+//         "-preset veryfast "
+//         "-crf 18 "
+//         "-pix_fmt yuv420p "
+//         "-movflags +faststart "
+//         "$audioCodec "
+//         "\"$outputPath\"";
+//
+//     final session = await FFmpegKit.execute(command);
+//     final returnCode = await session.getReturnCode();
+//
+//     if (ReturnCode.isSuccess(returnCode)) {
+//       return File(outputPath).existsSync() ? outputPath : null;
+//     }
+//
+//     return null;
+//   } catch (e) {
+//     rethrow;
+//   }
+// }
 
 Future<String?> mergeVideoWithOverlay(
   String videoPath,
-  String bottomOverlayPath, {
+  String? bottomOverlayPath, {
   String? topOverlayPath,
   String? animatedOverlayPath,
   String? audioFilePath,
@@ -221,7 +337,6 @@ Future<String?> mergeVideoWithOverlay(
         "${dir.path}/final_${DateTime.now().millisecondsSinceEpoch}.mp4";
 
     final resolution = await getVideoResolution(videoPath);
-
     if (resolution == null) return null;
 
     final duration = await getVideoDuration(videoPath);
@@ -233,27 +348,28 @@ Future<String?> mergeVideoWithOverlay(
     String filter = "";
     int index = 1;
 
-    /// Bottom overlay
-    inputs += "-i \"$bottomOverlayPath\" ";
-    filter += "[$index:v]scale=$videoWidth:-1[bottom];";
-    index++;
+    /// Bottom overlay (optional)
+    if (bottomOverlayPath != null) {
+      inputs += "-i \"$bottomOverlayPath\" ";
+      filter += "[$index:v]scale=$videoWidth:-1[bottom];";
+      index++;
+    }
 
-    /// Top overlay
+    /// Top overlay (optional)
     if (topOverlayPath != null) {
       inputs += "-i \"$topOverlayPath\" ";
       filter += "[$index:v]scale=$videoWidth:-1[top];";
       index++;
     }
 
-    /// Animated overlay
+    /// Animated overlay (optional)
     if (animatedOverlayPath != null) {
       inputs += "-loop 1 -t $duration -i \"$animatedOverlayPath\" ";
       filter += "[$index:v]scale=$videoWidth:-1[anim];";
-
       index++;
     }
 
-    ///  ADD AUDIO INPUT (ONLY THIS PART ADDED)
+    /// Audio input (optional)
     int? audioIndex;
     if (audioFilePath != null) {
       inputs += "-i \"$audioFilePath\" ";
@@ -261,23 +377,29 @@ Future<String?> mergeVideoWithOverlay(
       index++;
     }
 
-    /// ---- BASE VIDEO ----
+    /// Base video
     filter += "[0:v]setpts=PTS-STARTPTS[base];";
 
-    /// ---- APPLY BOTTOM OVERLAY ----
-    filter += "[base][bottom]overlay=0:H-h[baseWithBottom];";
+    /// Bottom overlay
+    if (bottomOverlayPath != null) {
+      filter += "[base][bottom]overlay=0:H-h[baseWithBottom];";
+    } else {
+      filter += "[base]copy[baseWithBottom];";
+    }
 
-    /// ---- ANIMATION ----
+    /// Animated overlay
     if (animatedOverlayPath != null) {
-      final animationExpr =
-          buildCustomAnimation(animData: animationData, resolution: resolution);
+      final animationExpr = buildCustomAnimation(
+        animData: animationData,
+        resolution: resolution,
+      );
 
       filter += "[baseWithBottom][anim]overlay=$animationExpr[animated];";
     } else {
       filter += "[baseWithBottom]copy[animated];";
     }
 
-    /// ---- APPLY TOP OVERLAY ----
+    /// Top overlay
     if (topOverlayPath != null) {
       filter += "[top][animated]vstack=inputs=2[stacked];"
           "[stacked]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
@@ -285,7 +407,7 @@ Future<String?> mergeVideoWithOverlay(
       filter += "[animated]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
     }
 
-    ///  AUDIO MAPPING LOGIC (ONLY THIS CHANGED)
+    /// Audio mapping
     String audioMap;
     String audioCodec;
 

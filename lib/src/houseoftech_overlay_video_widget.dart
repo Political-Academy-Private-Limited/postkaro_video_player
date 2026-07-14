@@ -216,7 +216,8 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
     try {
       final path = await exportVideoWithOverlay(
         videoUrl: widget.url,
-        bottomOverlayKey: _bottomOverlayKey,
+        bottomOverlayKey:
+            widget.bottomStripe == null ? null : _bottomOverlayKey,
         downloadWithOverlay: widget.downloadWithOverlay,
         topOverlayKey: widget.topStripe == null ? null : _topOverlayKey,
         animatedOverlayKey:
@@ -276,10 +277,25 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
       ///this is the main function for handling the merger of
       ///normal video and overlay widgets
       ///
+      // final path = await exportVideoWithOverlay(
+      //   videoUrl: widget.url,
+      //   bottomOverlayKey:widget.bottomStripe == null? null : _bottomOverlayKey,
+      //   downloadWithOverlay: widget.bottomStripe != null,
+      //   topOverlayKey: widget.topStripe == null ? null : _topOverlayKey,
+      //   animatedOverlayKey:
+      //       widget.animatedOverlay == null ? null : _animatedOverlayKey,
+      //   animationType: widget.animationData ??
+      //       OverlayAnimationData(
+      //           startOffset: Offset(1, 0),
+      //           endOffset: Offset(1, 0),
+      //           duration: Duration(milliseconds: 200)),
+      //   ttsText: widget.ttsText,
+      // );
       final path = await exportVideoWithOverlay(
         videoUrl: widget.url,
-        bottomOverlayKey: _bottomOverlayKey,
-        downloadWithOverlay: widget.bottomStripe != null,
+        bottomOverlayKey:
+            widget.bottomStripe == null ? null : _bottomOverlayKey,
+        downloadWithOverlay: widget.downloadWithOverlay,
         topOverlayKey: widget.topStripe == null ? null : _topOverlayKey,
         animatedOverlayKey:
             widget.animatedOverlay == null ? null : _animatedOverlayKey,

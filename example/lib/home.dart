@@ -18,10 +18,13 @@ class _HomeState extends State<Home> {
   late List<bool> isVideoPage;
 
   final List<String> videoUrls = <String>[
-    "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407",
-    "http://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/54286548113597547617",
-    "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/56949588480660426430",
-    "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/63671731050165849607",
+    // "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407",
+    // "http://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/54286548113597547617",
+    // "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/56949588480660426430",
+    // "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/63671731050165849607",
+    "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Fable/21332411772659771926",
+    "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Fable/21332411772659771926",
+    "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Fable/21332411772659771926",
   ];
 
   @override
@@ -133,25 +136,26 @@ class _HomeState extends State<Home> {
 
         videoRouteObserver: videoRouteObserver,
         onDownloadComplete: (success) {},
-        topStripe: Container(
-          color: Colors.green,
-          width: double.infinity,
-          height: 50,
-          child: Text("Hello leaders", style: TextStyle(fontSize: 37)),
-        ),
+        //
+        // topStripe: Container(
+        //   color: Colors.green,
+        //   width: double.infinity,
+        //   height: 50,
+        //   child: Text("Hello leaders", style: TextStyle(fontSize: 37)),
+        // ),
 
         /// these are for
-        bottomStripe: Container(
-          color: Colors.red,
-          width: double.infinity,
-          height: 70,
-          child: Text("Hello House Of tech"),
-        ),
+        // bottomStripe: Container(
+        //   color: Colors.red,
+        //   width: double.infinity,
+        //   height: 70,
+        //   child: Text("Hello House Of tech"),
+        // ),
 
         /// these is for animated overlay
         animationData: OverlayAnimationData(
-          startOffset: Offset(0.4900558064236405, 00.7541028551084328),
-          endOffset: Offset(00.49123784904799783, 00.2431156097164068),
+          startOffset: Offset(0, 0),
+          endOffset: Offset(0.5205994354346842, 0.8050067887819755),
           duration: Duration(milliseconds: 5000),
         ),
 
@@ -161,19 +165,21 @@ class _HomeState extends State<Home> {
             return BlurNetworkImage(
               url:
                   "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
-              curveDepth: 30,
-
+              topLeft: 100,
+              topRight: 100,
+              bottomLeft: 100,
+              bottomRight: 100,
               // Convert normalized values to pixels
-              width: constraints.maxWidth * 00.5632823604868059,
-              height: constraints.maxHeight * 00.1564673223574461,
+              width: constraints.maxWidth * 00.32637924426560605,
+              height: constraints.maxHeight * 0.1835883248994034,
             );
           },
         ),
 
         ///if you want reel mode, controller is not necessary
         // controller: ctrl,
-        ttsText:
-            "बिना फल की आसक्ति के, अपने कर्तव्यों (काम) को समर्पण के साथ करना ही सच्चा कर्मयोग है।",
+        // ttsText:
+        //     "बिना फल की आसक्ति के, अपने कर्तव्यों (काम) को समर्पण के साथ करना ही सच्चा कर्मयोग है।",
       ),
     );
   }

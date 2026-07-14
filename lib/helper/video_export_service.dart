@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:houseoftech_video_player/helper/utils.dart';
 
@@ -6,7 +8,7 @@ import 'overlay_animation_type.dart';
 Future<String?> exportVideoWithOverlay({
   bool downloadWithOverlay = false,
   required String videoUrl,
-  required GlobalKey bottomOverlayKey,
+  GlobalKey? bottomOverlayKey,
   GlobalKey? topOverlayKey,
   GlobalKey? animatedOverlayKey,
   required OverlayAnimationData animationType,
@@ -23,10 +25,9 @@ Future<String?> exportVideoWithOverlay({
       return videoPath;
     }
 
-    final overlayPath = await captureOverlay(bottomOverlayKey, "bottomOverlay");
-
-    if (overlayPath == null) {
-      return null;
+    String? overlayPath;
+    if (bottomOverlayKey != null) {
+      overlayPath = await captureOverlay(bottomOverlayKey, "bottomOverlay");
     }
 
     String? audioFilePath;
