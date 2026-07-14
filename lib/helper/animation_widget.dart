@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'overlay_animation_type.dart';
 
 class AnimationWidget extends StatefulWidget {
-  final OverlayAnimation animationType;
+  final OverlayAnimationData animationType;
   final Widget animatedOverlay;
   final double width;
   final double height;

@@ -111,7 +111,7 @@ class HotVideoPlayerOverlay extends StatefulWidget {
   /// when an widget will start animation and
   /// end the animation
   ///
-  final OverlayAnimation? animationData;
+  final OverlayAnimationData? animationData;
 
   ///
   ///custom progress indicator when video is being downloaded
@@ -222,7 +222,7 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
         animatedOverlayKey:
             widget.animatedOverlay == null ? null : _animatedOverlayKey,
         animationType: widget.animationData ??
-            OverlayAnimation(
+            OverlayAnimationData(
                 start: Offset(1, 0),
                 end: Offset(1, 0),
                 duration: Duration(milliseconds: 200)),
@@ -284,7 +284,7 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
         animatedOverlayKey:
             widget.animatedOverlay == null ? null : _animatedOverlayKey,
         animationType: widget.animationData ??
-            OverlayAnimation(
+            OverlayAnimationData(
                 start: Offset(1, 0),
                 end: Offset(1, 0),
                 duration: Duration(milliseconds: 200)),
@@ -376,7 +376,7 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
                         key: _animatedOverlayKey,
                         child: AnimationWidget(
                           animationType: widget.animationData ??
-                              const OverlayAnimation(
+                              const OverlayAnimationData(
                                 start: Offset(1, 0),
                                 end: Offset(1, 0),
                                 duration: Duration(milliseconds: 200),

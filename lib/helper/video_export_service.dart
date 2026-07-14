@@ -9,7 +9,7 @@ Future<String?> exportVideoWithOverlay({
   required GlobalKey bottomOverlayKey,
   GlobalKey? topOverlayKey,
   GlobalKey? animatedOverlayKey,
-  required OverlayAnimation animationType,
+  required OverlayAnimationData animationType,
   String? ttsText,
 }) async {
   try {

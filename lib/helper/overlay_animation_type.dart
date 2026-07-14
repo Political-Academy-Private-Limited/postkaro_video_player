@@ -34,12 +34,12 @@ enum OverlayPosition {
   bottomRight,
 }
 
-class OverlayAnimation {
+class OverlayAnimationData {
   final Offset start;
   final Offset end;
   final Duration duration;
 
-  const OverlayAnimation({
+  const OverlayAnimationData({
     required this.start,
     required this.end,
     required this.duration,

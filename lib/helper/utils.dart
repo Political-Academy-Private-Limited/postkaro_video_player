@@ -213,7 +213,7 @@ Future<String?> mergeVideoWithOverlay(
   String? topOverlayPath,
   String? animatedOverlayPath,
   String? audioFilePath,
-  required OverlayAnimation animationData,
+  required OverlayAnimationData animationData,
 }) async {
   try {
     final dir = await getTemporaryDirectory();
@@ -361,7 +361,7 @@ String endY(double value) {
 }
 
 String buildCustomAnimation({
-  required OverlayAnimation animData,
+  required OverlayAnimationData animData,
   required resolution,
 }) {
   final start = animData.start;
