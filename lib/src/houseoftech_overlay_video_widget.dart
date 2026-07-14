@@ -223,8 +223,8 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
             widget.animatedOverlay == null ? null : _animatedOverlayKey,
         animationType: widget.animationData ??
             OverlayAnimation(
-                start: OverlayPosition.bottomLeft,
-                end: OverlayPosition.bottomLeft,
+                start: Offset(1, 0),
+                end: Offset(1, 0),
                 duration: Duration(milliseconds: 200)),
         ttsText: widget.ttsText,
       );
@@ -285,8 +285,8 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
             widget.animatedOverlay == null ? null : _animatedOverlayKey,
         animationType: widget.animationData ??
             OverlayAnimation(
-                start: OverlayPosition.bottomLeft,
-                end: OverlayPosition.bottomLeft,
+                start: Offset(1, 0),
+                end: Offset(1, 0),
                 duration: Duration(milliseconds: 200)),
         ttsText: widget.ttsText,
       );
@@ -369,28 +369,26 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
               /// this is only for overlay which can be animated
               ///
               if (widget.animatedOverlay != null && !isVideoLoading)
-                RepaintBoundary(
-                  key: _animatedOverlayKey,
-                  child: AnimationWidget(
-                    animationType: widget.animationData ??
-                        const OverlayAnimation(
-                          start: OverlayPosition.bottomLeft,
-                          end: OverlayPosition.bottomLeft,
-                          duration: Duration(milliseconds: 200),
+                Positioned.fill(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return RepaintBoundary(
+                        key: _animatedOverlayKey,
+                        child: AnimationWidget(
+                          animationType: widget.animationData ??
+                              const OverlayAnimation(
+                                start: Offset(1, 0),
+                                end: Offset(1, 0),
+                                duration: Duration(milliseconds: 200),
+                              ),
+                          width: constraints.maxWidth,
+                          height: constraints.maxHeight,
+                          animatedOverlay: widget.animatedOverlay!,
                         ),
-                    animatedOverlay: widget.animatedOverlay!,
+                      );
+                    },
                   ),
                 ),
-              // AnimationWidget(
-              //   animationType: widget.animationData ??
-              //       const OverlayAnimation(
-              //         start: OverlayPosition.bottomLeft,
-              //         end: OverlayPosition.bottomLeft,
-              //         duration: Duration(milliseconds: 200),
-              //       ),
-              //   animatedOverlay: RepaintBoundary(
-              //       key: _animatedOverlayKey, child: widget.animatedOverlay!),
-              // ),
 
               /// Buttons (center right)
               Positioned(

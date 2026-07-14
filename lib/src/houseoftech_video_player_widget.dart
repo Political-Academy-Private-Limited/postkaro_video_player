@@ -297,15 +297,18 @@ class _HouseOfTechVideoPlayerState extends State<HouseOfTechVideoPlayer>
     Widget video;
 
     if (widget.reelsMode) {
+      // video = SizedBox.expand(
+      //   child: FittedBox(
+      //     fit: BoxFit.fill,
+      //     child: SizedBox(
+      //       width: vc!.value.size.width,
+      //       height: vc.value.size.height,
+      //       child: VideoPlayer(vc),
+      //     ),
+      //   ),
+      // );
       video = SizedBox.expand(
-        child: FittedBox(
-          fit: BoxFit.fill,
-          child: SizedBox(
-            width: vc!.value.size.width,
-            height: vc.value.size.height,
-            child: VideoPlayer(vc),
-          ),
-        ),
+        child: VideoPlayer(vc!),
       );
     } else {
       ///  Normal Aspect Ratio Mode

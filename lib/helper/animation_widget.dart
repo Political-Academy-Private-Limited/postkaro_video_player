@@ -4,11 +4,15 @@ import 'overlay_animation_type.dart';
 class AnimationWidget extends StatefulWidget {
   final OverlayAnimation animationType;
   final Widget animatedOverlay;
+  final double width;
+  final double height;
 
   const AnimationWidget({
     super.key,
     required this.animationType,
     required this.animatedOverlay,
+    required this.width,
+    required this.height,
   });
 
   @override
@@ -16,44 +20,25 @@ class AnimationWidget extends StatefulWidget {
 }
 
 class _AnimationWidgetState extends State<AnimationWidget> {
-  late Alignment _currentAlignment;
-
-  Alignment _getAlignment(OverlayPosition position) {
-    switch (position) {
-      case OverlayPosition.topLeft:
-        return Alignment.topLeft;
-      case OverlayPosition.topCenter:
-        return Alignment.topCenter;
-      case OverlayPosition.topRight:
-        return Alignment.topRight;
-
-      case OverlayPosition.centerLeft:
-        return Alignment.centerLeft;
-      case OverlayPosition.center:
-        return Alignment.center;
-      case OverlayPosition.centerRight:
-        return Alignment.centerRight;
-
-      case OverlayPosition.bottomLeft:
-        return Alignment.bottomLeft;
-      case OverlayPosition.bottomCenter:
-        return Alignment.bottomCenter;
-      case OverlayPosition.bottomRight:
-        return Alignment.bottomRight;
-    }
-  }
+  late Alignment _alignment;
 
   @override
   void initState() {
     super.initState();
 
-    _currentAlignment = _getAlignment(widget.animationType.start);
+    _alignment = Alignment(
+      widget.animationType.start.dx * 2 - 1,
+      widget.animationType.start.dy * 2 - 1,
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
       setState(() {
-        _currentAlignment = _getAlignment(widget.animationType.end);
+        _alignment = Alignment(
+          widget.animationType.end.dx * 2 - 1,
+          widget.animationType.end.dy * 2 - 1,
+        );
       });
     });
   }
@@ -63,13 +48,21 @@ class _AnimationWidgetState extends State<AnimationWidget> {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.animationType != widget.animationType) {
-      _currentAlignment = _getAlignment(widget.animationType.start);
+      setState(() {
+        _alignment = Alignment(
+          widget.animationType.start.dx * 2 - 1,
+          widget.animationType.start.dy * 2 - 1,
+        );
+      });
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
 
         setState(() {
-          _currentAlignment = _getAlignment(widget.animationType.end);
+          _alignment = Alignment(
+            widget.animationType.end.dx * 2 - 1,
+            widget.animationType.end.dy * 2 - 1,
+          );
         });
       });
     }
@@ -78,9 +71,9 @@ class _AnimationWidgetState extends State<AnimationWidget> {
   @override
   Widget build(BuildContext context) {
     return AnimatedAlign(
-      alignment: _currentAlignment,
       duration: widget.animationType.duration,
-      curve: Curves.easeIn,
+      curve: Curves.easeInOut,
+      alignment: _alignment,
       child: widget.animatedOverlay,
     );
   }

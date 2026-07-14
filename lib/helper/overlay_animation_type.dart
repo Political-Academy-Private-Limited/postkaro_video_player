@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 enum OverlayAnimationType {
   none,
   topCenter,
@@ -33,8 +35,8 @@ enum OverlayPosition {
 }
 
 class OverlayAnimation {
-  final OverlayPosition start;
-  final OverlayPosition end;
+  final Offset start;
+  final Offset end;
   final Duration duration;
 
   const OverlayAnimation({

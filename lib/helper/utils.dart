@@ -123,7 +123,6 @@ Future<String?> downloadVideo(String videoUrl) async {
 
     final videoFile = File('${tempDir.path}/$videoFileName');
     if (await videoFile.exists()) {
-
       return videoFile.path;
 
       /// Already downloaded
@@ -335,37 +334,6 @@ class OverlayPoint {
   const OverlayPoint(this.x, this.y);
 }
 
-OverlayPoint getPosition(OverlayPosition pos) {
-  switch (pos) {
-    case OverlayPosition.topLeft:
-      return const OverlayPoint(0, 0);
-
-    case OverlayPosition.topCenter:
-      return const OverlayPoint(.5, 0);
-
-    case OverlayPosition.topRight:
-      return const OverlayPoint(1, 0);
-
-    case OverlayPosition.centerLeft:
-      return const OverlayPoint(0, .5);
-
-    case OverlayPosition.center:
-      return const OverlayPoint(.5, .5);
-
-    case OverlayPosition.centerRight:
-      return const OverlayPoint(1, .5);
-
-    case OverlayPosition.bottomLeft:
-      return const OverlayPoint(0, 1);
-
-    case OverlayPosition.bottomCenter:
-      return const OverlayPoint(.5, 1);
-
-    case OverlayPosition.bottomRight:
-      return const OverlayPoint(1, 1);
-  }
-}
-
 ///new logic
 
 String startX(double value) {
@@ -396,18 +364,18 @@ String buildCustomAnimation({
   required OverlayAnimation animData,
   required resolution,
 }) {
-  final start = getPosition(animData.start);
-  final end = getPosition(animData.end);
+  final start = animData.start;
+  final end = animData.end;
   final duration = animData.duration.inMilliseconds / 1000.0;
 
   final progress = "if(lt(t\\,$duration)\\,"
       "(3*(t/$duration)*(t/$duration)-2*(t/$duration)*(t/$duration)*(t/$duration))"
       "\\,1)";
-  final sx = startX(start.x);
-  final sy = startY(start.y);
+  final sx = startX(start.dx);
+  final sy = startY(start.dy);
 
-  final ex = endX(end.x);
-  final ey = endY(end.y);
+  final ex = endX(end.dx);
+  final ey = endY(end.dy);
 
   return "x=($sx)+(($ex)-($sx))*($progress):"
       "y=($sy)+(($ey)-($sy))*($progress)";

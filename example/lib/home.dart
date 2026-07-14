@@ -149,12 +149,12 @@ class _HomeState extends State<Home> {
         ),
 
         /// these is for animated overlay
-        /// todo
         animationData: OverlayAnimation(
-          start: OverlayPosition.topRight,
-          end: OverlayPosition.bottomLeft,
+          start: Offset(1, 1),
+          end: Offset(0, 0),
           duration: Duration(milliseconds: 5000),
         ),
+
         animatedOverlay: BlurNetworkImage(
           url:
               "https://as1.ftcdn.net/jpg/16/65/67/54/1000_F_1665675417_kxphTKeghxkmNfhJfx8PqQI2DevEnaG2.webp",
