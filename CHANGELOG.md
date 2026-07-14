@@ -1,3 +1,6 @@
+## 1.2.2
+- Now bottom strip is optional and bug fixes.
+
 ## 1.2.1
   - bug fix.
   - Now supports custom normalized coordinates of the animated overlay instead relying on predefined types.
