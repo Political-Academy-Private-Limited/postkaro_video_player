@@ -47,7 +47,7 @@ Add the dependency to your `pubspec.yaml`:
 
 ``` yaml
 dependencies:
-  houseoftech_video_player: ^1.0.0
+  houseoftech_video_player: ^1.2.1
 ```
 
 Then run:

@@ -1,3 +1,7 @@
+## 1.2.1
+  - bug fix.
+  - Now supports custom normalized coordinates of the animated overlay instead relying on predefined types.
+
 ## 1.1.1
 - animated overlay fixed.
 - now animated overlay supports all the animation type.
