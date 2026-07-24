@@ -1,3 +1,5 @@
+## 1.2.3
+  - animation start/end fix
 ## 1.2.2
 - Now bottom strip is optional and bug fixes.
 
