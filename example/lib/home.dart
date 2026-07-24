@@ -154,7 +154,7 @@ class _HomeState extends State<Home> {
 
         /// these is for animated overlay
         animationData: OverlayAnimationData(
-          startOffset: Offset(0, 0),
+          startOffset: Offset(0.502994522261988, 0.013473020243982553),
           endOffset: Offset(0.5205994354346842, 0.8050067887819755),
           duration: Duration(milliseconds: 5000),
         ),

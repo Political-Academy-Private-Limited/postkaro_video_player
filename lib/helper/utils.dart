@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -458,28 +459,42 @@ class OverlayPoint {
 
 ///new logic
 
+// String startX(double value) {
+//   if (value == 0) return "-overlay_w";
+//   if (value == .5) return "main_w/2-overlay_w/2";
+//   return "main_w";
+// }
+//
+// String startY(double value) {
+//   if (value == 0) return "-overlay_h";
+//   if (value == .5) return "main_h/2-overlay_h/2";
+//   return "main_h";
+// }
 String startX(double value) {
-  if (value == 0) return "-overlay_w";
-  if (value == .5) return "main_w/2-overlay_w/2";
-  return "main_w";
+  return "(main_w+overlay_w)*$value-overlay_w";
 }
 
 String startY(double value) {
-  if (value == 0) return "-overlay_h";
-  if (value == .5) return "main_h/2-overlay_h/2";
-  return "main_h";
+  return "(main_h+overlay_h)*$value-overlay_h";
 }
 
+// String endX(double value) {
+//   if (value == 0) return "0";
+//   if (value == .5) return "main_w/2-overlay_w/2";
+//   return "main_w-overlay_w";
+// }
+//
+// String endY(double value) {
+//   if (value == 0) return "0";
+//   if (value == .5) return "main_h/2-overlay_h/2";
+//   return "main_h-overlay_h";
+// }
 String endX(double value) {
-  if (value == 0) return "0";
-  if (value == .5) return "main_w/2-overlay_w/2";
-  return "main_w-overlay_w";
+  return "(main_w-overlay_w)*$value";
 }
 
 String endY(double value) {
-  if (value == 0) return "0";
-  if (value == .5) return "main_h/2-overlay_h/2";
-  return "main_h-overlay_h";
+  return "(main_h-overlay_h)*$value";
 }
 
 String buildCustomAnimation({
@@ -487,6 +502,7 @@ String buildCustomAnimation({
   required resolution,
 }) {
   final start = animData.startOffset;
+  log("ddddddd start ${start.dx} and ${start.dy}");
   final end = animData.endOffset;
   final duration = animData.duration.inMilliseconds / 1000.0;
 
