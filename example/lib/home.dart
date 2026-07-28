@@ -157,6 +157,7 @@ class _HomeState extends State<Home> {
           startOffset: Offset(1, 0.46856232459530184),
           endOffset: Offset(0.49660591977997376, 0.8014966405764206),
           duration: Duration(milliseconds: 5000),
+          startDuration: Duration(milliseconds: 2000),
         ),
         // overlayWidget: LayoutBuilder(
         //   builder: (_, cons) {

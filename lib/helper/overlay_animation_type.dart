@@ -42,10 +42,12 @@ class OverlayAnimationData {
   ///if you need 5 sec of animation from start to end
   ///use milliseconds: 5000 not seconds: 5
   final Duration duration;
+  final Duration startDuration;
 
   const OverlayAnimationData({
     required this.startOffset,
     required this.endOffset,
     required this.duration,
+    required this.startDuration,
   });
 }

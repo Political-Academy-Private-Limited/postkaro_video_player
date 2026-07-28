@@ -17,26 +17,12 @@ class AnimationWidget extends StatefulWidget {
 
 class _AnimationWidgetState extends State<AnimationWidget> {
   late Alignment _alignment;
+  bool _visible = false;
 
   @override
   void initState() {
     super.initState();
-
-    _alignment = Alignment(
-      widget.animationType.startOffset.dx * 2 - 1,
-      widget.animationType.startOffset.dy * 2 - 1,
-    );
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-
-      setState(() {
-        _alignment = Alignment(
-          widget.animationType.endOffset.dx * 2 - 1,
-          widget.animationType.endOffset.dy * 2 - 1,
-        );
-      });
-    });
+    _resetAndStart();
   }
 
   @override
@@ -44,28 +30,51 @@ class _AnimationWidgetState extends State<AnimationWidget> {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.animationType != widget.animationType) {
+      _resetAndStart();
+    }
+  }
+
+  Alignment _toAlignment(Offset offset) {
+    return Alignment(
+      offset.dx * 2 - 1,
+      offset.dy * 2 - 1,
+    );
+  }
+
+  Future<void> _resetAndStart() async {
+    _alignment = _toAlignment(widget.animationType.startOffset);
+
+    if (mounted) {
       setState(() {
-        _alignment = Alignment(
-          widget.animationType.startOffset.dx * 2 - 1,
-          widget.animationType.startOffset.dy * 2 - 1,
-        );
-      });
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-
-        setState(() {
-          _alignment = Alignment(
-            widget.animationType.endOffset.dx * 2 - 1,
-            widget.animationType.endOffset.dy * 2 - 1,
-          );
-        });
+        _visible = false;
       });
     }
+
+    if (widget.animationType.startDuration > Duration.zero) {
+      await Future.delayed(widget.animationType.startDuration);
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _visible = true;
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      setState(() {
+        _alignment = _toAlignment(widget.animationType.endOffset);
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!_visible) {
+      return const SizedBox.shrink();
+    }
+
     return AnimatedAlign(
       duration: widget.animationType.duration,
       curve: Curves.easeInOut,

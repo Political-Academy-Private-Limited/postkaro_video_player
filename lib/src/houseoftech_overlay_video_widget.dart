@@ -241,9 +241,11 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
             widget.animatedOverlay == null ? null : _animatedOverlayKey,
         animationType: widget.animationData ??
             OverlayAnimationData(
-                startOffset: Offset(1, 0),
-                endOffset: Offset(1, 0),
-                duration: Duration(milliseconds: 200)),
+              startOffset: Offset(1, 0),
+              endOffset: Offset(1, 0),
+              duration: Duration(milliseconds: 2000),
+              startDuration: Duration(milliseconds: 1000),
+            ),
         ttsText: widget.ttsText,
       );
 
@@ -309,9 +311,11 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
             widget.animatedOverlay == null ? null : _animatedOverlayKey,
         animationType: widget.animationData ??
             OverlayAnimationData(
-                startOffset: Offset(1, 0),
-                endOffset: Offset(1, 0),
-                duration: Duration(milliseconds: 200)),
+              startOffset: Offset(1, 0),
+              endOffset: Offset(1, 0),
+              duration: Duration(milliseconds: 2000),
+              startDuration: Duration(milliseconds: 1000),
+            ),
         ttsText: widget.ttsText,
       );
 
@@ -403,7 +407,8 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
                               const OverlayAnimationData(
                                 startOffset: Offset(1, 0),
                                 endOffset: Offset(1, 0),
-                                duration: Duration(milliseconds: 200),
+                                duration: Duration(milliseconds: 2000),
+                                startDuration: Duration(milliseconds: 1000),
                               ),
                           animatedOverlay: widget.animatedOverlay!,
                         ),
@@ -420,10 +425,11 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
                         key: _overlayKey,
                         child: AnimationWidget(
                           animationType: OverlayAnimationData(
-                              startOffset:
-                                  widget.overlayPosition ?? Offset(0, 0),
-                              endOffset: widget.overlayPosition ?? Offset(0, 0),
-                              duration: Duration(milliseconds: 0)),
+                            startOffset: widget.overlayPosition ?? Offset(0, 0),
+                            endOffset: widget.overlayPosition ?? Offset(0, 0),
+                            duration: Duration(milliseconds: 0),
+                            startDuration: Duration(milliseconds: 0),
+                          ),
                           animatedOverlay: widget.overlayWidget!,
                         ),
                       );
@@ -438,11 +444,12 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
                         key: _overlayKey1,
                         child: AnimationWidget(
                           animationType: OverlayAnimationData(
-                              startOffset:
-                                  widget.overlayPosition1 ?? Offset(0, 0),
-                              endOffset:
-                                  widget.overlayPosition1 ?? Offset(0, 0),
-                              duration: Duration(milliseconds: 0)),
+                            startOffset:
+                                widget.overlayPosition1 ?? Offset(0, 0),
+                            endOffset: widget.overlayPosition1 ?? Offset(0, 0),
+                            duration: Duration(milliseconds: 0),
+                            startDuration: Duration(milliseconds: 0),
+                          ),
                           animatedOverlay: widget.overlayWidget1!,
                         ),
                       );

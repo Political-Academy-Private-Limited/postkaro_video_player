@@ -299,6 +299,12 @@ Future<String?> mergeVideoWithOverlay(
       );
 
       filter += "[baseWithBottom][anim]overlay=$animationExpr[animated];";
+      // final startTime = animationData.startDuration.inMilliseconds / 1000.0;
+      //
+      // filter += "[baseWithBottom][anim]overlay="
+      //     "$animationExpr:"
+      //     "enable='gte(t,$startTime)'"
+      //     "[animated];";
     } else {
       filter += "[baseWithBottom]copy[animated];";
     }
@@ -371,6 +377,13 @@ Future<String?> mergeVideoWithOverlay(
         "\"$outputPath\"";
 
     final session = await FFmpegKit.execute(command);
+    final logs = await session.getAllLogsAsString();
+    log(logs.toString());
+
+    final failStack = await session.getFailStackTrace();
+    log(failStack.toString());
+
+    log(command);
     final returnCode = await session.getReturnCode();
 
     if (ReturnCode.isSuccess(returnCode)) {
@@ -396,17 +409,6 @@ class OverlayPoint {
 
 ///new logic
 
-// String startX(double value) {
-//   if (value == 0) return "-overlay_w";
-//   if (value == .5) return "main_w/2-overlay_w/2";
-//   return "main_w";
-// }
-//
-// String startY(double value) {
-//   if (value == 0) return "-overlay_h";
-//   if (value == .5) return "main_h/2-overlay_h/2";
-//   return "main_h";
-// }
 String startX(double value) {
   return "(main_w+overlay_w)*$value-overlay_w";
 }
@@ -415,17 +417,6 @@ String startY(double value) {
   return "(main_h+overlay_h)*$value-overlay_h";
 }
 
-// String endX(double value) {
-//   if (value == 0) return "0";
-//   if (value == .5) return "main_w/2-overlay_w/2";
-//   return "main_w-overlay_w";
-// }
-//
-// String endY(double value) {
-//   if (value == 0) return "0";
-//   if (value == .5) return "main_h/2-overlay_h/2";
-//   return "main_h-overlay_h";
-// }
 String endX(double value) {
   return "(main_w-overlay_w)*$value";
 }
@@ -439,19 +430,42 @@ String buildCustomAnimation({
   required resolution,
 }) {
   final start = animData.startOffset;
-  log("ddddddd start ${start.dx} and ${start.dy}");
   final end = animData.endOffset;
+
+  final startTime = animData.startDuration.inMilliseconds / 1000.0;
   final duration = animData.duration.inMilliseconds / 1000.0;
 
-  final progress = "if(lt(t\\,$duration)\\,"
-      "(3*(t/$duration)*(t/$duration)-2*(t/$duration)*(t/$duration)*(t/$duration))"
-      "\\,1)";
   final sx = startX(start.dx);
   final sy = startY(start.dy);
 
   final ex = endX(end.dx);
   final ey = endY(end.dy);
 
+  final progress = "if(lt(t\\,$startTime)\\,0\\,"
+      "if(gte(t\\,${startTime + duration})\\,1\\,"
+      "(3*((t-$startTime)/$duration)^2-2*((t-$startTime)/$duration)^3)"
+      "))";
   return "x=($sx)+(($ex)-($sx))*($progress):"
       "y=($sy)+(($ey)-($sy))*($progress)";
 }
+// String buildCustomAnimation({
+//   required OverlayAnimationData animData,
+//   required resolution,
+// }) {
+//   final start = animData.startOffset;
+//   log("ddddddd start ${start.dx} and ${start.dy}");
+//   final end = animData.endOffset;
+//   final duration = animData.duration.inMilliseconds / 1000.0;
+//
+//   final progress = "if(lt(t\\,$duration)\\,"
+//       "(3*(t/$duration)*(t/$duration)-2*(t/$duration)*(t/$duration)*(t/$duration))"
+//       "\\,1)";
+//   final sx = startX(start.dx);
+//   final sy = startY(start.dy);
+//
+//   final ex = endX(end.dx);
+//   final ey = endY(end.dy);
+//
+//   return "x=($sx)+(($ex)-($sx))*($progress):"
+//       "y=($sy)+(($ey)-($sy))*($progress)";
+// }
