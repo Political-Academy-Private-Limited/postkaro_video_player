@@ -1,3 +1,6 @@
+## 1.2.4
+  - multi overlay added 
+  -  bug fix
 ## 1.2.3
   - animation start/end fix
 ## 1.2.2
