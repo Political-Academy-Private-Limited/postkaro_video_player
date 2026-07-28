@@ -4,15 +4,11 @@ import 'overlay_animation_type.dart';
 class AnimationWidget extends StatefulWidget {
   final OverlayAnimationData animationType;
   final Widget animatedOverlay;
-  final double width;
-  final double height;
 
   const AnimationWidget({
     super.key,
     required this.animationType,
     required this.animatedOverlay,
-    required this.width,
-    required this.height,
   });
 
   @override

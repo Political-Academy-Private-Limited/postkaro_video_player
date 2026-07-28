@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:houseoftech_video_player/helper/utils.dart';
 
@@ -10,6 +9,10 @@ Future<String?> exportVideoWithOverlay({
   GlobalKey? bottomOverlayKey,
   GlobalKey? topOverlayKey,
   GlobalKey? animatedOverlayKey,
+  GlobalKey? overlayKey,
+  Offset? overlayOffSet,
+  GlobalKey? overlayKey1,
+  Offset? overlayOffSet1,
   required OverlayAnimationData animationType,
   String? ttsText,
 }) async {
@@ -41,16 +44,28 @@ Future<String?> exportVideoWithOverlay({
       animatedOverlayKey != null
           ? captureOverlay(animatedOverlayKey, "animatedOverlay")
           : Future.value(null),
+      overlayKey != null
+          ? captureOverlay(overlayKey, "overlayKey")
+          : Future.value(null),
+      overlayKey1 != null
+          ? captureOverlay(overlayKey1, "overlayKey1")
+          : Future.value(null),
     ]);
 
     final topOverlayPath = results[0];
     final animatedOverlayPath = results[1];
+    final overlayWidgetPath = results[2];
+    final overlayWidgetPath1 = results[3];
 
     final finalVideo = await mergeVideoWithOverlay(
       videoPath,
       overlayPath,
       topOverlayPath: topOverlayPath,
       animatedOverlayPath: animatedOverlayPath,
+      overlayWidgetOffSet: overlayOffSet,
+      overlayWidgetPath: overlayWidgetPath,
+      overlayWidgetOffSet1: overlayOffSet1,
+      overlayWidgetPath1: overlayWidgetPath1,
       animationData: animationType,
       audioFilePath: audioFilePath,
     );

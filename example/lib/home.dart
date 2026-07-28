@@ -145,12 +145,12 @@ class _HomeState extends State<Home> {
         // ),
 
         /// these are for
-        // bottomStripe: Container(
-        //   color: Colors.red,
-        //   width: double.infinity,
-        //   height: 70,
-        //   child: Text("Hello House Of tech"),
-        // ),
+        bottomStripe: Container(
+          color: Colors.red,
+          width: double.infinity,
+          height: 70,
+          child: Text("Hello House Of tech"),
+        ),
 
         /// these is for animated overlay
         animationData: OverlayAnimationData(
@@ -158,6 +158,51 @@ class _HomeState extends State<Home> {
           endOffset: Offset(0.49660591977997376, 0.8014966405764206),
           duration: Duration(milliseconds: 5000),
         ),
+        // overlayWidget: LayoutBuilder(
+        //   builder: (_, cons) {
+        //     return SizedBox(
+        //
+        //       child: Image.network(
+        //         "https://res.cloudinary.com/dlorfgn2x/image/upload/q_auto,f_auto/posts/13265817271009286096",
+        //         fit: BoxFit.cover,
+        //         height: (.4796265643749041) * cons.maxHeight,
+        //         width: (.2628651015605094) * cons.maxWidth,
+        //       ),
+        //     );
+        //   },
+        // ),
+        overlayWidget: LayoutBuilder(
+          builder: (context, constraints) {
+            return BlurNetworkImage(
+              url:
+                  "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
+              topLeft: 100,
+              topRight: 100,
+              bottomLeft: 100,
+              bottomRight: 100,
+              // Convert normalized values to pixels
+              width: constraints.maxWidth * 00.32637924426560605,
+              height: constraints.maxHeight * 0.1835883248994034,
+            );
+          },
+        ),
+        overlayPosition: Offset(0, 0.46856232459530184),
+        overlayWidget1: LayoutBuilder(
+          builder: (context, constraints) {
+            return BlurNetworkImage(
+              url:
+                  "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
+              topLeft: 100,
+              topRight: 100,
+              bottomLeft: 100,
+              bottomRight: 100,
+              // Convert normalized values to pixels
+              width: constraints.maxWidth * 00.32637924426560605,
+              height: constraints.maxHeight * 0.1835883248994034,
+            );
+          },
+        ),
+        overlayPosition1: Offset(0, 1),
 
         //this is for correct dimensions
         animatedOverlay: LayoutBuilder(

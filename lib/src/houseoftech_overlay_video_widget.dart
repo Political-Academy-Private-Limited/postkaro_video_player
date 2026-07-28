@@ -105,6 +105,13 @@ class HotVideoPlayerOverlay extends StatefulWidget {
   ///
   final Widget? animatedOverlay;
 
+  /// this is customOverlay
+  final Widget? overlayWidget;
+  final Offset? overlayPosition;
+
+  final Widget? overlayWidget1;
+  final Offset? overlayPosition1;
+
   ///
   /// for selecting different animation type
   /// basically it is starting and end point
@@ -164,6 +171,8 @@ class HotVideoPlayerOverlay extends StatefulWidget {
     this.controller,
     this.bottomStripe,
     this.onDownload,
+    this.overlayWidget,
+    this.overlayWidget1,
     // this.overlayChild,
     this.onShare,
     this.reelsMode = false,
@@ -192,6 +201,8 @@ class HotVideoPlayerOverlay extends StatefulWidget {
     this.ttsText,
     this.isMute = false,
     this.videoLoader,
+    this.overlayPosition,
+    this.overlayPosition1,
   });
 
   @override
@@ -202,6 +213,8 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
   final GlobalKey _bottomOverlayKey = GlobalKey();
   final GlobalKey _topOverlayKey = GlobalKey();
   final GlobalKey _animatedOverlayKey = GlobalKey();
+  final GlobalKey _overlayKey = GlobalKey();
+  final GlobalKey _overlayKey1 = GlobalKey();
 
   bool _isProcessing = false;
   bool isVideoLoading = false;
@@ -216,6 +229,10 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
     try {
       final path = await exportVideoWithOverlay(
         videoUrl: widget.url,
+        overlayKey: widget.overlayWidget == null ? null : _overlayKey,
+        overlayKey1: widget.overlayWidget1 == null ? null : _overlayKey1,
+        overlayOffSet: widget.overlayPosition,
+        overlayOffSet1: widget.overlayPosition1,
         bottomOverlayKey:
             widget.bottomStripe == null ? null : _bottomOverlayKey,
         downloadWithOverlay: widget.downloadWithOverlay,
@@ -277,22 +294,13 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
       ///this is the main function for handling the merger of
       ///normal video and overlay widgets
       ///
-      // final path = await exportVideoWithOverlay(
-      //   videoUrl: widget.url,
-      //   bottomOverlayKey:widget.bottomStripe == null? null : _bottomOverlayKey,
-      //   downloadWithOverlay: widget.bottomStripe != null,
-      //   topOverlayKey: widget.topStripe == null ? null : _topOverlayKey,
-      //   animatedOverlayKey:
-      //       widget.animatedOverlay == null ? null : _animatedOverlayKey,
-      //   animationType: widget.animationData ??
-      //       OverlayAnimationData(
-      //           startOffset: Offset(1, 0),
-      //           endOffset: Offset(1, 0),
-      //           duration: Duration(milliseconds: 200)),
-      //   ttsText: widget.ttsText,
-      // );
+
       final path = await exportVideoWithOverlay(
         videoUrl: widget.url,
+        overlayKey: widget.overlayWidget == null ? null : _overlayKey,
+        overlayKey1: widget.overlayWidget1 == null ? null : _overlayKey1,
+        overlayOffSet: widget.overlayPosition,
+        overlayOffSet1: widget.overlayPosition1,
         bottomOverlayKey:
             widget.bottomStripe == null ? null : _bottomOverlayKey,
         downloadWithOverlay: widget.downloadWithOverlay,
@@ -397,9 +405,45 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
                                 endOffset: Offset(1, 0),
                                 duration: Duration(milliseconds: 200),
                               ),
-                          width: constraints.maxWidth,
-                          height: constraints.maxHeight,
                           animatedOverlay: widget.animatedOverlay!,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+              if (widget.overlayWidget != null && !isVideoLoading)
+                Positioned.fill(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return RepaintBoundary(
+                        key: _overlayKey,
+                        child: AnimationWidget(
+                          animationType: OverlayAnimationData(
+                              startOffset:
+                                  widget.overlayPosition ?? Offset(0, 0),
+                              endOffset: widget.overlayPosition ?? Offset(0, 0),
+                              duration: Duration(milliseconds: 0)),
+                          animatedOverlay: widget.overlayWidget!,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              if (widget.overlayWidget1 != null && !isVideoLoading)
+                Positioned.fill(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return RepaintBoundary(
+                        key: _overlayKey1,
+                        child: AnimationWidget(
+                          animationType: OverlayAnimationData(
+                              startOffset:
+                                  widget.overlayPosition1 ?? Offset(0, 0),
+                              endOffset:
+                                  widget.overlayPosition1 ?? Offset(0, 0),
+                              duration: Duration(milliseconds: 0)),
+                          animatedOverlay: widget.overlayWidget1!,
                         ),
                       );
                     },
