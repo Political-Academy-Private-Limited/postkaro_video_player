@@ -157,7 +157,7 @@ class _HomeState extends State<Home> {
           startOffset: Offset(1, 0.46856232459530184),
           endOffset: Offset(0.49660591977997376, 0.8014966405764206),
           duration: Duration(milliseconds: 5000),
-          startDuration: Duration(milliseconds: 2000),
+          startDuration: Duration(milliseconds: 0000),
         ),
         // overlayWidget: LayoutBuilder(
         //   builder: (_, cons) {
@@ -210,7 +210,7 @@ class _HomeState extends State<Home> {
           builder: (context, constraints) {
             return BlurNetworkImage(
               url:
-                  "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
+                  "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/63671731050165849607.png",
               topLeft: 100,
               topRight: 100,
               bottomLeft: 100,

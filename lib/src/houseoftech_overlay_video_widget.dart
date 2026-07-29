@@ -400,20 +400,35 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
                 Positioned.fill(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      return RepaintBoundary(
-                        key: _animatedOverlayKey,
-                        child: AnimationWidget(
-                          animationType: widget.animationData ??
-                              const OverlayAnimationData(
-                                startOffset: Offset(1, 0),
-                                endOffset: Offset(1, 0),
-                                duration: Duration(milliseconds: 2000),
-                                startDuration: Duration(milliseconds: 1000),
-                              ),
-                          animatedOverlay: widget.animatedOverlay!,
-                        ),
+                      return AnimationWidget(
+                        animationType: widget.animationData ??
+                            const OverlayAnimationData(
+                              startOffset: Offset(1, 0),
+                              endOffset: Offset(1, 0),
+                              duration: Duration(milliseconds: 2000),
+                              startDuration: Duration(milliseconds: 1000),
+                            ),
+                        animatedOverlay: widget.animatedOverlay!,
                       );
                     },
+                  ),
+                ),
+              if (widget.animatedOverlay != null && !isVideoLoading)
+                Transform.translate(
+                  offset: const Offset(-100000, -100000),
+                  child: IgnorePointer(
+                    child: RepaintBoundary(
+                      key: _animatedOverlayKey,
+                      child: AnimationWidget(
+                        animationType: OverlayAnimationData(
+                          startOffset: widget.animationData!.endOffset,
+                          endOffset: widget.animationData!.endOffset,
+                          duration: Duration.zero,
+                          startDuration: Duration.zero,
+                        ),
+                        animatedOverlay: widget.animatedOverlay!,
+                      ),
+                    ),
                   ),
                 ),
 

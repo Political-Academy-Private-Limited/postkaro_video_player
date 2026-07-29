@@ -1,3 +1,5 @@
+## 1.2.5
+  - bug fix
 ## 1.2.4
   - multi overlay added 
   -  bug fix
