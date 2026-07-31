@@ -343,7 +343,7 @@ Future<String?> mergeVideoWithOverlay(
 
     /// Top overlay
     if (topOverlayPath != null) {
-      filter += "[top][animated]vstack=inputs=2[stacked];"
+      filter += "[top][widgetApplied1]vstack=inputs=2[stacked];"
           "[stacked]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
     } else {
       // filter += "[animated]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
