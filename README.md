@@ -47,7 +47,7 @@ Add the dependency to your `pubspec.yaml`:
 
 ``` yaml
 dependencies:
-  houseoftech_video_player: ^1.2.1
+  houseoftech_video_player: ^1.2.6
 ```
 
 Then run:
@@ -153,29 +153,6 @@ HouseOfTechVideoPlayerOverlay(
 ------------------------------------------------------------------------
 
 
-
-
-```dart
-///types of Overlay Animations
-enum OverlayAnimationType {
-  none, /// defauls to 'top left' 
-
-  // Basic
-  topToCenter,
-  rightToCenter,
-  leftToCenter,
-  bottomToCenter,
-  leftToRight,
-  rightToLeft,
-
-  // Diagonal
-  diagonalTopLeftToBottomRight,
-  diagonalTopRightToBottomLeft,
-  diagonalBottomLeftToTopRight,
-  diagonalBottomRightToTopLeft,
-}
-
-```
 
 ## 🎬 Reels Mode
 

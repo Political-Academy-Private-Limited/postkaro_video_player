@@ -72,12 +72,10 @@ class HotVideoPlayerOverlay extends StatefulWidget {
   /// If true, the video restarts automatically.
   final bool loop;
 
-  ///default is false
-  ///you can mute/unmute a video
+  /// Whether the video should be muted. Defaults to false.
   final bool isMute;
 
-  ///this is for showing place holder when video is loading
-  ///
+  /// Placeholder widget shown while the video is loading.
   final Widget? videoLoader;
 
   /// The aspect ratio of the video player.
@@ -105,64 +103,42 @@ class HotVideoPlayerOverlay extends StatefulWidget {
   ///
   final Widget? animatedOverlay;
 
-  /// this is customOverlay
+  /// Custom overlay widgets and their positions.
   final Widget? overlayWidget;
   final Offset? overlayPosition;
 
   final Widget? overlayWidget1;
   final Offset? overlayPosition1;
 
-  ///
-  /// for selecting different animation type
-  /// basically it is starting and end point
-  /// when an widget will start animation and
-  /// end the animation
-  ///
+  /// Animation data for the `animatedOverlay`.
+  /// Defines starting/ending offsets and durations.
   final OverlayAnimationData? animationData;
 
-  ///
-  ///custom progress indicator when video is being downloaded
-  ///by default there is CircularProgressIndicator in center
-  ///
+  /// Custom progress indicator shown during video processing.
+  /// Defaults to a centered `CircularProgressIndicator`.
   final Widget? shareDownloadProgressIndicator;
 
   ///download with custom overlays
   final bool downloadWithOverlay;
 
-  ///
-  final void Function(bool, double)? onStatusChanged;
+  /// Callback for video status changes (loading state and progress).
+  final void Function(bool isLoading, double progress)? onStatusChanged;
 
-  ///
-  ///for custom download and share location
-  ///default will be left 0, right 6, top 0 and bottom 0;
-  ///
+  /// Padding/Positioning for the action buttons (download/share).
   final double top;
   final double bottom;
   final double? left;
 
-  ///
-  ///for space bw download and share buttons
-  ///default to 16
-  ///
+  /// Vertical space between the download and share buttons.
   final double spaceBwDownShare;
 
-  ///
-  ///this is for route change play pause
-  ///this helps to auto pause the video
-  ///if
-  /// any bottom sheet is open or
-  /// dialog box is open, it auto pause and play the video
-  ///
+  /// Observer to automatically pause/play video based on route changes.
   final VideoRouteObserver? videoRouteObserver;
 
-  ///
-  ///this is for the folder name where
-  /// the downloaded video will save
-  ///
+  /// The folder name where the downloaded video will be saved.
   final String? folderName;
 
-  ///this is tts text
-  ///
+  /// Text-to-speech text to be included in the exported video.
   final String? ttsText;
 
   const HotVideoPlayerOverlay({
@@ -210,6 +186,13 @@ class HotVideoPlayerOverlay extends StatefulWidget {
 }
 
 class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
+  static const _defaultAnimationData = OverlayAnimationData(
+    startOffset: Offset(1, 0),
+    endOffset: Offset(1, 0),
+    duration: Duration(milliseconds: 2000),
+    startDuration: Duration(milliseconds: 1000),
+  );
+
   final GlobalKey _bottomOverlayKey = GlobalKey();
   final GlobalKey _topOverlayKey = GlobalKey();
   final GlobalKey _animatedOverlayKey = GlobalKey();
@@ -220,117 +203,79 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
   bool isVideoLoading = false;
   double videoProgress = 0;
 
-  ///this is for handling download
+  /// Internal method to process video with overlays for download or share.
+  Future<String?> _processVideoWithOverlay() async {
+    return exportVideoWithOverlay(
+      videoUrl: widget.url,
+      overlayKey: widget.overlayWidget == null ? null : _overlayKey,
+      overlayKey1: widget.overlayWidget1 == null ? null : _overlayKey1,
+      overlayOffSet: widget.overlayPosition,
+      overlayOffSet1: widget.overlayPosition1,
+      bottomOverlayKey: widget.bottomStripe == null ? null : _bottomOverlayKey,
+      downloadWithOverlay: widget.downloadWithOverlay,
+      topOverlayKey: widget.topStripe == null ? null : _topOverlayKey,
+      animatedOverlayKey:
+          widget.animatedOverlay == null ? null : _animatedOverlayKey,
+      animationType: widget.animationData ?? _defaultAnimationData,
+      ttsText: widget.ttsText,
+    );
+  }
+
+  /// Handles the video download process.
   Future<void> _handleDownload() async {
     if (_isProcessing) return;
 
     setState(() => _isProcessing = true);
 
     try {
-      final path = await exportVideoWithOverlay(
-        videoUrl: widget.url,
-        overlayKey: widget.overlayWidget == null ? null : _overlayKey,
-        overlayKey1: widget.overlayWidget1 == null ? null : _overlayKey1,
-        overlayOffSet: widget.overlayPosition,
-        overlayOffSet1: widget.overlayPosition1,
-        bottomOverlayKey:
-            widget.bottomStripe == null ? null : _bottomOverlayKey,
-        downloadWithOverlay: widget.downloadWithOverlay,
-        topOverlayKey: widget.topStripe == null ? null : _topOverlayKey,
-        animatedOverlayKey:
-            widget.animatedOverlay == null ? null : _animatedOverlayKey,
-        animationType: widget.animationData ??
-            OverlayAnimationData(
-              startOffset: Offset(1, 0),
-              endOffset: Offset(1, 0),
-              duration: Duration(milliseconds: 2000),
-              startDuration: Duration(milliseconds: 1000),
-            ),
-        ttsText: widget.ttsText,
-      );
+      final path = await _processVideoWithOverlay();
 
       if (path != null) {
-        ///initializing the media store
         await MediaStore.ensureInitialized();
-
-        ///
-        ///this is where download file will be saved
-        ///
         MediaStore.appFolder = widget.folderName ?? "Overlay Video";
 
-        ///
-        ///for saving the temp file to file
-        ///so user can see it in gallery
-        ///
         await MediaStore().saveFile(
           tempFilePath: path,
           dirType: DirType.video,
           dirName: DirName.movies,
         );
 
-        ///
-        /// this is for bool call back
-        /// when a video is downloaded
-        /// it return true to it's parent.
-        ///
         widget.onDownloadComplete?.call(true);
+      } else {
+        widget.onDownloadComplete?.call(false);
       }
     } catch (e) {
       widget.onDownloadComplete?.call(false);
-
-      throw e.toString();
-    }
-    if (mounted) {
-      setState(() => _isProcessing = false);
+      debugPrint("Download error: $e");
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+      }
     }
   }
 
-  ///this is for download and share the video with or without overlay widget
+  /// Handles the video sharing process.
   Future<void> _handleShare() async {
     if (_isProcessing) return;
 
     setState(() => _isProcessing = true);
 
     try {
-      ///
-      ///this is the main function for handling the merger of
-      ///normal video and overlay widgets
-      ///
-
-      final path = await exportVideoWithOverlay(
-        videoUrl: widget.url,
-        overlayKey: widget.overlayWidget == null ? null : _overlayKey,
-        overlayKey1: widget.overlayWidget1 == null ? null : _overlayKey1,
-        overlayOffSet: widget.overlayPosition,
-        overlayOffSet1: widget.overlayPosition1,
-        bottomOverlayKey:
-            widget.bottomStripe == null ? null : _bottomOverlayKey,
-        downloadWithOverlay: widget.downloadWithOverlay,
-        topOverlayKey: widget.topStripe == null ? null : _topOverlayKey,
-        animatedOverlayKey:
-            widget.animatedOverlay == null ? null : _animatedOverlayKey,
-        animationType: widget.animationData ??
-            OverlayAnimationData(
-              startOffset: Offset(1, 0),
-              endOffset: Offset(1, 0),
-              duration: Duration(milliseconds: 2000),
-              startDuration: Duration(milliseconds: 1000),
-            ),
-        ttsText: widget.ttsText,
-      );
+      final path = await _processVideoWithOverlay();
 
       if (path != null) {
         await shareVideo(path);
         widget.onShareComplete?.call(true);
+      } else {
+        widget.onShareComplete?.call(false);
       }
     } catch (e) {
       widget.onShareComplete?.call(false);
-
-      throw e.toString();
-    }
-
-    if (mounted) {
-      setState(() => _isProcessing = false);
+      debugPrint("Share error: $e");
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+      }
     }
   }
 
@@ -338,189 +283,147 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        /// top overlay Overlay
-        /// with global key attached to it
-        ///
-
         if (widget.topStripe != null)
           RepaintBoundary(
             key: _topOverlayKey,
             child: widget.topStripe!,
           ),
-
         Expanded(
-          child: Stack(
-            children: [
-              /// Video  (Full Screen Cover)
-              /// the video is cached, it don't load from internet
-              /// it users the cached video to show
-              ///
-              Positioned.fill(
-                child: HouseOfTechVideoPlayer(
-                  url: widget.url,
-                  controller: widget.controller,
-                  reelsMode: widget.reelsMode,
-                  autoPlay: widget.autoPlay,
-                  loop: widget.loop,
-                  isMute: widget.isMute,
-                  videoLoader: widget.videoLoader,
-                  videoRouteObserver: widget.videoRouteObserver,
-
-                  ///
-                  ///this is if video is loaded or not
-                  ///return true only if video is completely loaded
-                  ///
-                  onStatusChanged: (isLoading, progress) {
-                    setState(() {
-                      isVideoLoading = isLoading;
-                      videoProgress = progress;
-
-                      /// it return the status of the video
-                      widget.onStatusChanged?.call(false, 0);
-                    });
-                  },
-                  // aspectRatio: 9/16,
-                ),
-              ),
-
-              /// Bottom Overlay
-              if (widget.bottomStripe != null)
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: RepaintBoundary(
-                    key: _bottomOverlayKey,
-                    child: widget.bottomStripe!,
-                  ),
-                ),
-
-              ///
-              /// this is only for overlay which can be animated
-              ///
-              if (widget.animatedOverlay != null && !isVideoLoading)
+          child: ClipRRect(
+            child: Stack(
+              children: [
                 Positioned.fill(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return AnimationWidget(
-                        animationType: widget.animationData ??
-                            const OverlayAnimationData(
-                              startOffset: Offset(1, 0),
-                              endOffset: Offset(1, 0),
-                              duration: Duration(milliseconds: 2000),
-                              startDuration: Duration(milliseconds: 1000),
-                            ),
-                        animatedOverlay: widget.animatedOverlay!,
-                      );
+                  child: HouseOfTechVideoPlayer(
+                    url: widget.url,
+                    controller: widget.controller,
+                    reelsMode: widget.reelsMode,
+                    autoPlay: widget.autoPlay,
+                    loop: widget.loop,
+                    isMute: widget.isMute,
+                    videoLoader: widget.videoLoader,
+                    videoRouteObserver: widget.videoRouteObserver,
+                    onStatusChanged: (isLoading, progress) {
+                      setState(() {
+                        isVideoLoading = isLoading;
+                        videoProgress = progress;
+                        widget.onStatusChanged?.call(isLoading, progress);
+                      });
                     },
                   ),
                 ),
-              if (widget.animatedOverlay != null && !isVideoLoading)
-                Transform.translate(
-                  offset: const Offset(-100000, -100000),
-                  child: IgnorePointer(
+                if (widget.bottomStripe != null)
+                  Align(
+                    alignment: Alignment.bottomCenter,
                     child: RepaintBoundary(
-                      key: _animatedOverlayKey,
-                      child: AnimationWidget(
-                        animationType: OverlayAnimationData(
-                          startOffset: widget.animationData!.endOffset,
-                          endOffset: widget.animationData!.endOffset,
-                          duration: Duration.zero,
-                          startDuration: Duration.zero,
-                        ),
-                        animatedOverlay: widget.animatedOverlay!,
-                      ),
+                      key: _bottomOverlayKey,
+                      child: widget.bottomStripe!,
                     ),
                   ),
-                ),
-
-              if (widget.overlayWidget != null && !isVideoLoading)
-                Positioned.fill(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return RepaintBoundary(
-                        key: _overlayKey,
-                        child: AnimationWidget(
-                          animationType: OverlayAnimationData(
-                            startOffset: widget.overlayPosition ?? Offset(0, 0),
-                            endOffset: widget.overlayPosition ?? Offset(0, 0),
-                            duration: Duration(milliseconds: 0),
-                            startDuration: Duration(milliseconds: 0),
-                          ),
-                          animatedOverlay: widget.overlayWidget!,
-                        ),
-                      );
-                    },
+                if (widget.animatedOverlay != null && !isVideoLoading) ...[
+                  AnimationWidget(
+                    animationType:
+                        widget.animationData ?? _defaultAnimationData,
+                    animatedOverlay: widget.animatedOverlay!,
                   ),
-                ),
-              if (widget.overlayWidget1 != null && !isVideoLoading)
-                Positioned.fill(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return RepaintBoundary(
-                        key: _overlayKey1,
+                  Transform.translate(
+                    offset: const Offset(-100000, -100000),
+                    child: IgnorePointer(
+                      child: RepaintBoundary(
+                        key: _animatedOverlayKey,
                         child: AnimationWidget(
                           animationType: OverlayAnimationData(
                             startOffset:
-                                widget.overlayPosition1 ?? Offset(0, 0),
-                            endOffset: widget.overlayPosition1 ?? Offset(0, 0),
-                            duration: Duration(milliseconds: 0),
-                            startDuration: Duration(milliseconds: 0),
+                                (widget.animationData ?? _defaultAnimationData)
+                                    .endOffset,
+                            endOffset:
+                                (widget.animationData ?? _defaultAnimationData)
+                                    .endOffset,
+                            duration: Duration.zero,
+                            startDuration: Duration.zero,
                           ),
-                          animatedOverlay: widget.overlayWidget1!,
+                          animatedOverlay: widget.animatedOverlay!,
                         ),
-                      );
-                    },
-                  ),
-                ),
-
-              /// Buttons (center right)
-              Positioned(
-                right: widget.right,
-                top: widget.top,
-                bottom: widget.bottom,
-                left: widget.left,
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _ActionButton(
-                        icon: widget.downloadIcon ??
-                            Icon(
-                              Icons.download,
-                              color: Colors.white,
-                              size: 26,
-                            ),
-                        onTap: widget.onDownload ?? _handleDownload,
-                        disabled: _isProcessing,
-                        backgroundColor: widget.downloadBackgroundColor,
-                      ),
-                      SizedBox(height: widget.spaceBwDownShare),
-                      _ActionButton(
-                        icon: widget.shareIcon ??
-                            Icon(
-                              Icons.share,
-                              color: Colors.white,
-                              size: 26,
-                            ),
-                        onTap: widget.onShare ?? _handleShare,
-                        disabled: _isProcessing,
-                        backgroundColor: widget.shareBackgroundColor ??
-                            widget.downloadBackgroundColor,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              /// Loader
-              if (_isProcessing)
-                widget.shareDownloadProgressIndicator ??
-                    Container(
-                      color: Colors.black54,
-                      child: Center(
-                        child: CircularProgressIndicator(),
                       ),
                     ),
-            ],
+                  ),
+                ],
+                if (widget.overlayWidget != null && !isVideoLoading)
+                  Positioned.fill(
+                    child: RepaintBoundary(
+                      key: _overlayKey,
+                      child: AnimationWidget(
+                        animationType: OverlayAnimationData(
+                          startOffset: widget.overlayPosition ?? Offset.zero,
+                          endOffset: widget.overlayPosition ?? Offset.zero,
+                          duration: Duration.zero,
+                          startDuration: Duration.zero,
+                        ),
+                        animatedOverlay: widget.overlayWidget!,
+                      ),
+                    ),
+                  ),
+                if (widget.overlayWidget1 != null && !isVideoLoading)
+                  Positioned.fill(
+                    child: RepaintBoundary(
+                      key: _overlayKey1,
+                      child: AnimationWidget(
+                        animationType: OverlayAnimationData(
+                          startOffset: widget.overlayPosition1 ?? Offset.zero,
+                          endOffset: widget.overlayPosition1 ?? Offset.zero,
+                          duration: Duration.zero,
+                          startDuration: Duration.zero,
+                        ),
+                        animatedOverlay: widget.overlayWidget1!,
+                      ),
+                    ),
+                  ),
+                Positioned(
+                  right: widget.right,
+                  top: widget.top,
+                  bottom: widget.bottom,
+                  left: widget.left,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _ActionButton(
+                          icon: widget.downloadIcon ??
+                              const Icon(
+                                Icons.download,
+                                color: Colors.white,
+                                size: 26,
+                              ),
+                          onTap: widget.onDownload ?? _handleDownload,
+                          disabled: _isProcessing,
+                          backgroundColor: widget.downloadBackgroundColor,
+                        ),
+                        SizedBox(height: widget.spaceBwDownShare),
+                        _ActionButton(
+                          icon: widget.shareIcon ??
+                              const Icon(
+                                Icons.share,
+                                color: Colors.white,
+                                size: 26,
+                              ),
+                          onTap: widget.onShare ?? _handleShare,
+                          disabled: _isProcessing,
+                          backgroundColor: widget.shareBackgroundColor ??
+                              widget.downloadBackgroundColor,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (_isProcessing)
+                  widget.shareDownloadProgressIndicator ??
+                      const ColoredBox(
+                        color: Colors.black54,
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+              ],
+            ),
           ),
         ),
       ],

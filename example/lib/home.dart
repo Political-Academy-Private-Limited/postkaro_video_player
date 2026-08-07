@@ -50,36 +50,37 @@ class _HomeState extends State<Home> {
       ),
       body: PageView.builder(
         controller: _pageController,
+        physics: RangeMaintainingScrollPhysics(),
         scrollDirection: Axis.vertical,
         itemCount: isVideoPage.length,
-        onPageChanged: (value) {
-          if (value % 2 == 0) {
-            showModalBottomSheet(
-              context: context,
-              builder: (context) {
-                return Container(
-                  height: 200,
-                  padding: const EdgeInsets.all(20),
-                  child: const Center(
-                    child: Text(
-                      "Hello",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            );
-          }
-        },
+        // onPageChanged: (value) {
+        //   if (value % 2 == 0) {
+        //     showModalBottomSheet(
+        //       context: context,
+        //       builder: (context) {
+        //         return Container(
+        //           height: 200,
+        //           padding: const EdgeInsets.all(20),
+        //           child: const Center(
+        //             child: Text(
+        //               "Hello",
+        //               style: TextStyle(
+        //                 fontSize: 24,
+        //                 fontWeight: FontWeight.bold,
+        //               ),
+        //             ),
+        //           ),
+        //         );
+        //       },
+        //     );
+        //   }
+        // },
         itemBuilder: (context, index) {
-          if (isVideoPage[index]) {
-            return _buildVideoPage(index);
-          } else {
-            return _buildImagePage();
-          }
+          // if (isVideoPage[index]) {
+          return _buildVideoPage(index);
+          // } else {
+          //   return _buildImagePage();
+          // }
         },
       ),
       drawer: Drawer(
@@ -125,7 +126,6 @@ class _HomeState extends State<Home> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 80),
-
       child: HotVideoPlayerOverlay(
         url: videoUrl,
         aspectRatio: 9 / 16,
@@ -154,27 +154,27 @@ class _HomeState extends State<Home> {
 
         /// these is for animated overlay
         animationData: OverlayAnimationData(
-          startOffset: Offset(.5, 0),
+          startOffset: Offset(0, 0),
           endOffset: Offset(.555555555556, .87777779),
           duration: Duration(milliseconds: 5000),
           startDuration: Duration(milliseconds: 0000),
         ),
 
-        // overlayWidget: LayoutBuilder(
-        //   builder: (context, constraints) {
-        //     return BlurNetworkImage(
-        //       url:
-        //           "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
-        //       topLeft: 100,
-        //       topRight: 100,
-        //       bottomLeft: 100,
-        //       bottomRight: 100,
-        //       // Convert normalized values to pixels
-        //       width: constraints.maxWidth * 00.32637924426560605,
-        //       height: constraints.maxHeight * 0.1835883248994034,
-        //     );
-        //   },
-        // ),
+        animatedOverlay: LayoutBuilder(
+          builder: (context, constraints) {
+            return BlurNetworkImage(
+              url:
+                  "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
+              topLeft: 100,
+              topRight: 100,
+              bottomLeft: 100,
+              bottomRight: 100,
+              // Convert normalized values to pixels
+              width: constraints.maxWidth * 00.32637924426560605,
+              height: constraints.maxHeight * 0.1835883248994034,
+            );
+          },
+        ),
         overlayPosition: Offset(0, 0.46856232459530184),
         // overlayWidget1: LayoutBuilder(
         //   builder: (context, constraints) {

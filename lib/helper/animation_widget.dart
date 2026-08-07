@@ -15,13 +15,23 @@ class AnimationWidget extends StatefulWidget {
   State<AnimationWidget> createState() => _AnimationWidgetState();
 }
 
-class _AnimationWidgetState extends State<AnimationWidget> {
-  late Alignment _alignment;
+class _AnimationWidgetState extends State<AnimationWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<Alignment> _alignmentAnimation;
+
   bool _visible = false;
 
   @override
   void initState() {
     super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: widget.animationType.duration,
+    );
+
+    _configureAnimation();
     _resetAndStart();
   }
 
@@ -30,6 +40,8 @@ class _AnimationWidgetState extends State<AnimationWidget> {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.animationType != widget.animationType) {
+      _controller.duration = widget.animationType.duration;
+      _configureAnimation();
       _resetAndStart();
     }
   }
@@ -41,8 +53,20 @@ class _AnimationWidgetState extends State<AnimationWidget> {
     );
   }
 
+  void _configureAnimation() {
+    _alignmentAnimation = AlignmentTween(
+      begin: _toAlignment(widget.animationType.startOffset),
+      end: _toAlignment(widget.animationType.endOffset),
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
   Future<void> _resetAndStart() async {
-    _alignment = _toAlignment(widget.animationType.startOffset);
+    _controller.reset();
 
     if (mounted) {
       setState(() {
@@ -60,13 +84,13 @@ class _AnimationWidgetState extends State<AnimationWidget> {
       _visible = true;
     });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+    _controller.forward();
+  }
 
-      setState(() {
-        _alignment = _toAlignment(widget.animationType.endOffset);
-      });
-    });
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -75,10 +99,14 @@ class _AnimationWidgetState extends State<AnimationWidget> {
       return const SizedBox.shrink();
     }
 
-    return AnimatedAlign(
-      duration: widget.animationType.duration,
-      curve: Curves.easeInOut,
-      alignment: _alignment,
+    return AnimatedBuilder(
+      animation: _alignmentAnimation,
+      builder: (context, child) {
+        return Align(
+          alignment: _alignmentAnimation.value,
+          child: child,
+        );
+      },
       child: widget.animatedOverlay,
     );
   }
