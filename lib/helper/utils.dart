@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:ffmpeg_kit_flutter_new_https_gpl/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_new_https_gpl/ffmpeg_kit_config.dart';
 import 'package:ffmpeg_kit_flutter_new_https_gpl/ffprobe_kit.dart';
 import 'package:ffmpeg_kit_flutter_new_https_gpl/return_code.dart';
 import 'package:flutter/material.dart';
@@ -218,6 +219,7 @@ Future<String?> mergeVideoWithOverlay(
   Offset? overlayWidgetOffSet1,
   String? audioFilePath,
   required OverlayAnimationData animationData,
+  void Function(double progress)? onProgress,
 }) async {
   try {
     final dir = await getTemporaryDirectory();
@@ -232,167 +234,157 @@ Future<String?> mergeVideoWithOverlay(
 
     final int videoWidth = resolution['width']!;
 
-    String inputs = "-i \"$videoPath\" ";
-    String filter = "";
-    int index = 1;
+    List<String> inputs = ["-i \"$videoPath\""];
+    List<String> filterSteps = [];
+    int inputIndex = 1;
 
     /// Bottom overlay (optional)
+    String? bottomLabel;
     if (bottomOverlayPath != null) {
-      inputs += "-i \"$bottomOverlayPath\" ";
-      filter += "[$index:v]scale=$videoWidth:-1[bottom];";
-      index++;
+      inputs.add("-i \"$bottomOverlayPath\"");
+      filterSteps.add("[$inputIndex:v]scale=$videoWidth:-1[bottom]");
+      bottomLabel = "[bottom]";
+      inputIndex++;
     }
 
     /// Top overlay (optional)
+    String? topLabel;
     if (topOverlayPath != null) {
-      inputs += "-i \"$topOverlayPath\" ";
-      filter += "[$index:v]scale=$videoWidth:-1[top];";
-      index++;
+      inputs.add("-i \"$topOverlayPath\"");
+      filterSteps.add("[$inputIndex:v]scale=$videoWidth:-1[top]");
+      topLabel = "[top]";
+      inputIndex++;
     }
 
     /// Animated overlay (optional)
+    String? animLabel;
     if (animatedOverlayPath != null) {
-      inputs += "-loop 1 -t $duration -i \"$animatedOverlayPath\" ";
-      filter += "[$index:v]scale=$videoWidth:-1[anim];";
-      index++;
+      inputs.add("-loop 1 -t $duration -i \"$animatedOverlayPath\"");
+      filterSteps.add("[$inputIndex:v]scale=$videoWidth:-1[anim]");
+      animLabel = "[anim]";
+      inputIndex++;
     }
 
-    /// Overlay widget (optional)
+    /// Overlay widgets
+    String? widgetLabel;
     if (overlayWidgetPath != null) {
-      inputs += "-i \"$overlayWidgetPath\" ";
-      // filter += "[$index:v]scale=-1:-1[widget];";
-      filter += "[$index:v]scale=$videoWidth:-1[widget];";
-      index++;
+      inputs.add("-i \"$overlayWidgetPath\"");
+      filterSteps.add("[$inputIndex:v]scale=$videoWidth:-1[widget]");
+      widgetLabel = "[widget]";
+      inputIndex++;
     }
 
-    /// Overlay widget1 (optional)
+    String? widgetLabel1;
     if (overlayWidgetPath1 != null) {
-      inputs += "-i \"$overlayWidgetPath1\" ";
-      // filter += "[$index:v]scale=-1:-1[widget];";
-      filter += "[$index:v]scale=$videoWidth:-1[widget1];";
-      index++;
+      inputs.add("-i \"$overlayWidgetPath1\"");
+      filterSteps.add("[$inputIndex:v]scale=$videoWidth:-1[widget1]");
+      widgetLabel1 = "[widget1]";
+      inputIndex++;
     }
 
-    /// Audio input (optional)
-    int? audioIndex;
+    /// Audio input
+    int? audioInputIndex;
     if (audioFilePath != null) {
-      inputs += "-i \"$audioFilePath\" ";
-      audioIndex = index;
-      index++;
+      inputs.add("-i \"$audioFilePath\"");
+      audioInputIndex = inputIndex;
+      inputIndex++;
     }
 
-    /// Base video
-    filter += "[0:v]setpts=PTS-STARTPTS[base];";
+    /// Start building the filter complex graph
+    String currentV = "[0:v]";
+    filterSteps.add("$currentV setpts=PTS-STARTPTS[base]");
+    currentV = "[base]";
 
-    /// Bottom overlay
-    if (bottomOverlayPath != null) {
-      filter += "[base][bottom]overlay=0:H-h[baseWithBottom];";
-    } else {
-      filter += "[base]copy[baseWithBottom];";
+    /// 1. Apply Bottom Overlay
+    if (bottomLabel != null) {
+      filterSteps.add("$currentV$bottomLabel overlay=0:H-h[v_bottom]");
+      currentV = "[v_bottom]";
     }
 
-    /// Animated overlay
-    if (animatedOverlayPath != null) {
+    /// 2. Apply Animated Overlay
+    if (animLabel != null) {
       final animationExpr = buildCustomAnimation(
         animData: animationData,
         resolution: resolution,
       );
-
-      filter += "[baseWithBottom][anim]overlay=$animationExpr[animated];";
-      // final startTime = animationData.startDuration.inMilliseconds / 1000.0;
-      //
-      // filter += "[baseWithBottom][anim]overlay="
-      //     "$animationExpr:"
-      //     "enable='gte(t,$startTime)'"
-      //     "[animated];";
-    } else {
-      filter += "[baseWithBottom]copy[animated];";
+      filterSteps.add("$currentV$animLabel overlay=$animationExpr[v_anim]");
+      currentV = "[v_anim]";
     }
 
-    /// Overlay widget
-    if (overlayWidgetPath != null) {
-      final dx = overlayWidgetOffSet?.dx ?? 0;
-      final dy = overlayWidgetOffSet?.dy ?? 0;
-
-      final x = endX(dx);
-      final y = endY(dy);
-
-      filter += "[animated][widget]overlay="
-          "x=$x:"
-          "y=$y"
-          "[widgetApplied];";
-    } else {
-      filter += "[animated]copy[widgetApplied];";
+    /// 3. Apply Overlay Widget 1
+    if (widgetLabel != null) {
+      final x = endX(overlayWidgetOffSet?.dx ?? 0);
+      final y = endY(overlayWidgetOffSet?.dy ?? 0);
+      filterSteps.add("$currentV$widgetLabel overlay=x=$x:y=$y[v_w1]");
+      currentV = "[v_w1]";
     }
 
-    /// Overlay widget
-    if (overlayWidgetPath1 != null) {
-      final dx = overlayWidgetOffSet1?.dx ?? 0;
-      final dy = overlayWidgetOffSet1?.dy ?? 0;
-
-      final x = endX(dx);
-      final y = endY(dy);
-
-      filter += "[widgetApplied][widget1]overlay="
-          "x=$x:"
-          "y=$y"
-          "[widgetApplied1];";
-    } else {
-      filter += "[widgetApplied]copy[widgetApplied1];";
+    /// 4. Apply Overlay Widget 2
+    if (widgetLabel1 != null) {
+      final x = endX(overlayWidgetOffSet1?.dx ?? 0);
+      final y = endY(overlayWidgetOffSet1?.dy ?? 0);
+      filterSteps.add("$currentV$widgetLabel1 overlay=x=$x:y=$y[v_w2]");
+      currentV = "[v_w2]";
     }
 
-    /// Top overlay
-    if (topOverlayPath != null) {
-      filter += "[top][widgetApplied1]vstack=inputs=2[stacked];"
-          "[stacked]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
-    } else {
-      // filter += "[animated]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
-      // filter += "[widgetApplied]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
-      filter += "[widgetApplied1]scale=trunc(iw/2)*2:trunc(ih/2)*2[v]";
+    /// 5. Apply Top Overlay (vstack)
+    if (topLabel != null) {
+      filterSteps.add("$topLabel$currentV vstack=inputs=2[v_stacked]");
+      currentV = "[v_stacked]";
     }
 
-    /// Audio mapping
-    String audioMap;
-    String audioCodec;
+    /// 6. Ensure even dimensions for libx264
+    filterSteps.add("$currentV scale=trunc(iw/2)*2:trunc(ih/2)*2[final_v]");
 
-    if (audioFilePath != null && audioIndex != null) {
-      audioMap = "-map $audioIndex:0";
-      audioCodec = "-c:a aac -t $duration";
+    /// Audio Processing: Mix TTS with original audio if present
+    String audioMapping = "";
+    if (audioFilePath != null && audioInputIndex != null) {
+      // amix mixes the audio streams. duration=first ensures it doesn't extend beyond the video.
+      filterSteps.add(
+          "[0:a][$audioInputIndex:a]amix=inputs=2:duration=first:dropout_transition=2[a]");
+      audioMapping = "-map \"[a]\" -c:a aac -b:a 128k";
     } else {
-      audioMap = "-map 0:a?";
-      audioCodec = "-c:a copy";
+      audioMapping = "-map 0:a? -c:a copy";
     }
 
-    final command = "-y "
-        "$inputs "
-        "-filter_complex \"$filter\" "
-        "-map \"[v]\" "
-        "$audioMap "
-        "-c:v libx264 "
-        "-preset veryfast "
-        "-crf 18 "
-        "-pix_fmt yuv420p "
-        "-movflags +faststart "
-        "$audioCodec "
+    final filterComplex = filterSteps.join(";");
+    final command = "-y ${inputs.join(" ")} "
+        "-filter_complex \"$filterComplex\" "
+        "-map \"[final_v]\" $audioMapping "
+        "-c:v libx264 -preset ultrafast -crf 23 "
+        "-pix_fmt yuv420p -movflags +faststart "
         "\"$outputPath\"";
 
+    log("FFmpeg Command: $command");
+
+    if (onProgress != null) {
+      FFmpegKitConfig.enableStatisticsCallback((stats) {
+        final timeInMs = stats.getTime();
+        if (timeInMs > 0) {
+          double progress = timeInMs / (duration * 1000);
+          if (progress > 1.0) progress = 1.0;
+          onProgress(progress);
+        }
+      });
+    }
+
     final session = await FFmpegKit.execute(command);
-    final logs = await session.getAllLogsAsString();
-    log(logs.toString());
-
-    final failStack = await session.getFailStackTrace();
-    log(failStack.toString());
-
-    log(command);
     final returnCode = await session.getReturnCode();
+
+    if (onProgress != null) {
+      FFmpegKitConfig.enableStatisticsCallback(null);
+    }
 
     if (ReturnCode.isSuccess(returnCode)) {
       return File(outputPath).existsSync() ? outputPath : null;
+    } else {
+      final logs = await session.getAllLogsAsString();
+      log("FFmpeg Failed: $logs");
+      return null;
     }
-
-    return null;
   } catch (e) {
-    rethrow;
+    log("Merge Error: $e");
+    return null;
   }
 }
 

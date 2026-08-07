@@ -124,6 +124,9 @@ class HotVideoPlayerOverlay extends StatefulWidget {
   /// Callback for video status changes (loading state and progress).
   final void Function(bool isLoading, double progress)? onStatusChanged;
 
+  /// Callback for export progress (download/share).
+  final void Function(double progress)? onExportProgress;
+
   /// Padding/Positioning for the action buttons (download/share).
   final double top;
   final double bottom;
@@ -179,6 +182,7 @@ class HotVideoPlayerOverlay extends StatefulWidget {
     this.videoLoader,
     this.overlayPosition,
     this.overlayPosition1,
+    this.onExportProgress,
   });
 
   @override
@@ -202,9 +206,13 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
   bool _isProcessing = false;
   bool isVideoLoading = false;
   double videoProgress = 0;
+  double _exportProgress = 0;
 
   /// Internal method to process video with overlays for download or share.
   Future<String?> _processVideoWithOverlay() async {
+    setState(() {
+      _exportProgress = 0;
+    });
     return exportVideoWithOverlay(
       videoUrl: widget.url,
       overlayKey: widget.overlayWidget == null ? null : _overlayKey,
@@ -218,6 +226,14 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
           widget.animatedOverlay == null ? null : _animatedOverlayKey,
       animationType: widget.animationData ?? _defaultAnimationData,
       ttsText: widget.ttsText,
+      onProgress: (progress) {
+        if (mounted) {
+          setState(() {
+            _exportProgress = progress;
+          });
+          widget.onExportProgress?.call(progress);
+        }
+      },
     );
   }
 
@@ -416,12 +432,38 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
                 ),
                 if (_isProcessing)
                   widget.shareDownloadProgressIndicator ??
-                      const ColoredBox(
-                        color: Colors.black54,
-                        child: Center(
-                          child: CircularProgressIndicator(),
+                      Center(
+                        child: SizedBox(
+                          width: 100,
+                          height: 100,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              CircularProgressIndicator(
+                                value: _exportProgress > 0
+                                    ? _exportProgress
+                                    : null,
+                                strokeWidth: 4,
+
+                                backgroundColor: Colors.white24, // Track color
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Colors.blue, // Progress color
+                                ),
+                              ),
+                              Text(
+                                _exportProgress > 0
+                                    ? "${(_exportProgress * 100).toInt()}%"
+                                    : "",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      )
               ],
             ),
           ),

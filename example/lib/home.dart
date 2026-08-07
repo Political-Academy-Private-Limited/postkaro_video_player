@@ -133,16 +133,15 @@ class _HomeState extends State<Home> {
         downloadWithOverlay: true,
         isMute: true,
         videoLoader: Center(child: Text("place....")),
-
         videoRouteObserver: videoRouteObserver,
         onDownloadComplete: (success) {},
         //
-        topStripe: Container(
-          color: Colors.green,
-          width: double.infinity,
-          height: 50,
-          child: Text("Hello leaders", style: TextStyle(fontSize: 37)),
-        ),
+        // topStripe: Container(
+        //   color: Colors.green,
+        //   width: double.infinity,
+        //   height: 50,
+        //   child: Text("Hello leaders", style: TextStyle(fontSize: 37)),
+        // ),
 
         /// these are for
         bottomStripe: Container(
