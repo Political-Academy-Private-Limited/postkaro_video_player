@@ -192,8 +192,9 @@ Future<double?> getVideoDuration(String path) async {
 /// ===============================
 ///
 
-Future<void> shareVideo(String path) async {
+Future<void> shareVideo(String path, String? shareText) async {
   final params = ShareParams(
+    text: shareText,
     files: [
       XFile(
         path,

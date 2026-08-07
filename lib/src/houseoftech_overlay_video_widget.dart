@@ -144,6 +144,9 @@ class HotVideoPlayerOverlay extends StatefulWidget {
   /// Text-to-speech text to be included in the exported video.
   final String? ttsText;
 
+  /// This is for share text.
+  final String? shareText;
+
   const HotVideoPlayerOverlay({
     super.key,
     required this.url,
@@ -183,6 +186,7 @@ class HotVideoPlayerOverlay extends StatefulWidget {
     this.overlayPosition,
     this.overlayPosition1,
     this.onExportProgress,
+    this.shareText,
   });
 
   @override
@@ -297,7 +301,7 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
       final path = await _processVideoWithOverlay();
 
       if (path != null) {
-        await shareVideo(path);
+        await shareVideo(path, widget.shareText);
         widget.onShareComplete?.call(true);
       } else {
         widget.onShareComplete?.call(false);
