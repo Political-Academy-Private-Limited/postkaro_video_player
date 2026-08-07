@@ -197,6 +197,8 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
     startDuration: Duration(milliseconds: 1000),
   );
 
+  late final HouseOfTechController _controller;
+
   final GlobalKey _bottomOverlayKey = GlobalKey();
   final GlobalKey _topOverlayKey = GlobalKey();
   final GlobalKey _animatedOverlayKey = GlobalKey();
@@ -207,6 +209,21 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
   bool isVideoLoading = false;
   double videoProgress = 0;
   double _exportProgress = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? HouseOfTechController();
+  }
+
+  @override
+  void dispose() {
+    // Only dispose if we created it internally
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
+    super.dispose();
+  }
 
   /// Internal method to process video with overlays for download or share.
   Future<String?> _processVideoWithOverlay() async {
@@ -311,7 +328,7 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
                 Positioned.fill(
                   child: HouseOfTechVideoPlayer(
                     url: widget.url,
-                    controller: widget.controller,
+                    controller: _controller,
                     reelsMode: widget.reelsMode,
                     autoPlay: widget.autoPlay,
                     loop: widget.loop,
@@ -340,6 +357,7 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
                     animationType:
                         widget.animationData ?? _defaultAnimationData,
                     animatedOverlay: widget.animatedOverlay!,
+                    controller: _controller,
                   ),
                   Transform.translate(
                     offset: const Offset(-100000, -100000),

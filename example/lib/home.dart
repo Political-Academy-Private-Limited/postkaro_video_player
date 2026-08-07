@@ -156,7 +156,7 @@ class _HomeState extends State<Home> {
           startOffset: Offset(0, 0),
           endOffset: Offset(.555555555556, .87777779),
           duration: Duration(milliseconds: 5000),
-          startDuration: Duration(milliseconds: 0000),
+          startDuration: Duration(milliseconds: 3000),
         ),
 
         animatedOverlay: LayoutBuilder(

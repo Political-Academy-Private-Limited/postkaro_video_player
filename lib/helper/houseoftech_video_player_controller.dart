@@ -1,8 +1,9 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_cache_manager/file.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
-class HouseOfTechController {
+class HouseOfTechController extends ChangeNotifier {
   ///this is the Video Controller.
   VideoPlayerController? _videoController;
 
@@ -50,6 +51,7 @@ class HouseOfTechController {
       if (autoPlay) {
         await _videoController!.play();
       }
+      notifyListeners();
     } catch (e) {
       /// fallback to network if cache fails
       _videoController = VideoPlayerController.networkUrl(Uri.parse(url));
@@ -63,6 +65,7 @@ class HouseOfTechController {
       if (autoPlay) {
         await _videoController!.play();
       }
+      notifyListeners();
     }
   }
 
@@ -87,6 +90,7 @@ class HouseOfTechController {
   Future<void> disposeVideo() async {
     await _videoController?.dispose();
     _videoController = null;
+    notifyListeners();
   }
 
   Future<void> dispose() async {
