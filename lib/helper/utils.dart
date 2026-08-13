@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -85,27 +84,40 @@ Future<String?> convertTextToSpeech(String title) async {
 
     if (result != 1) return null;
 
-    /// Android common save locations
-    final possibleDirs = [
-      "/storage/emulated/0/Music/",
-      "/storage/emulated/0/Ringtones/",
-      "/storage/emulated/0/Download/",
-    ];
-
     String? finalPath;
 
-    for (int i = 0; i < 10; i++) {
-      await Future.delayed(const Duration(milliseconds: 300));
+    if (Platform.isAndroid) {
+      /// Android common save locations for synthesized files
+      final possibleDirs = [
+        "/storage/emulated/0/Music/",
+        "/storage/emulated/0/Ringtones/",
+        "/storage/emulated/0/Download/",
+      ];
 
-      for (final dir in possibleDirs) {
-        final file = File("$dir$fileName");
+      for (int i = 0; i < 15; i++) {
+        await Future.delayed(const Duration(milliseconds: 300));
+        for (final dir in possibleDirs) {
+          final file = File("$dir$fileName");
+          if (await file.exists()) {
+            finalPath = file.path;
+            break;
+          }
+        }
+        if (finalPath != null) break;
+      }
+    } else if (Platform.isIOS) {
+      /// On iOS, the file is usually saved in the app's documents directory
+      final Directory docDir = await getApplicationDocumentsDirectory();
+      final file = File("${docDir.path}/$fileName");
+
+      // Wait a bit for synthesis to complete and file to be written
+      for (int i = 0; i < 15; i++) {
         if (await file.exists()) {
           finalPath = file.path;
           break;
         }
+        await Future.delayed(const Duration(milliseconds: 300));
       }
-
-      if (finalPath != null) break;
     }
 
     return finalPath;
@@ -339,7 +351,6 @@ Future<String?> mergeVideoWithOverlay(
     /// Audio Processing: Mix TTS with original audio if present
     String audioMapping = "";
     if (audioFilePath != null && audioInputIndex != null) {
-      // amix mixes the audio streams. duration=first ensures it doesn't extend beyond the video.
       filterSteps.add(
           "[0:a][$audioInputIndex:a]amix=inputs=2:duration=first:dropout_transition=2[a]");
       audioMapping = "-map \"[a]\" -c:a aac -b:a 128k";
@@ -347,15 +358,26 @@ Future<String?> mergeVideoWithOverlay(
       audioMapping = "-map 0:a? -c:a copy";
     }
 
+    // Use Hardware Acceleration if possible
+    String vCodec = "libx264";
+    String vCodecParams = "-preset ultrafast -crf 23";
+
+    if (Platform.isAndroid) {
+      vCodec = "h264_mediacodec";
+      vCodecParams =
+          "-b:v 4M"; // Bitrate is usually better for hardware encoders
+    } else if (Platform.isIOS) {
+      vCodec = "h264_videotoolbox";
+      vCodecParams = "-b:v 4M";
+    }
+
     final filterComplex = filterSteps.join(";");
     final command = "-y ${inputs.join(" ")} "
         "-filter_complex \"$filterComplex\" "
         "-map \"[final_v]\" $audioMapping "
-        "-c:v libx264 -preset ultrafast -crf 23 "
+        "-c:v $vCodec $vCodecParams "
         "-pix_fmt yuv420p -movflags +faststart "
         "\"$outputPath\"";
-
-    log("FFmpeg Command: $command");
 
     if (onProgress != null) {
       FFmpegKitConfig.enableStatisticsCallback((stats) {
@@ -378,12 +400,9 @@ Future<String?> mergeVideoWithOverlay(
     if (ReturnCode.isSuccess(returnCode)) {
       return File(outputPath).existsSync() ? outputPath : null;
     } else {
-      final logs = await session.getAllLogsAsString();
-      log("FFmpeg Failed: $logs");
       return null;
     }
   } catch (e) {
-    log("Merge Error: $e");
     return null;
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:houseoftech_video_player/helper/animation_widget.dart';
 import 'package:houseoftech_video_player/helper/utils.dart';
 import 'package:houseoftech_video_player/helper/video_export_service.dart';
-import 'package:media_store_plus/media_store_plus.dart';
+import 'package:gal/gal.dart';
 import '../houseoftech_video_player.dart';
 
 class HotVideoPlayerOverlay extends StatefulWidget {
@@ -268,14 +268,13 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
       final path = await _processVideoWithOverlay();
 
       if (path != null) {
-        await MediaStore.ensureInitialized();
-        MediaStore.appFolder = widget.folderName ?? "Overlay Video";
+        // Gal is platform-agnostic and handles saving to gallery on both iOS and Android.
+        final hasAccess = await Gal.hasAccess();
+        if (!hasAccess) {
+          await Gal.requestAccess();
+        }
 
-        await MediaStore().saveFile(
-          tempFilePath: path,
-          dirType: DirType.video,
-          dirName: DirName.movies,
-        );
+        await Gal.putVideo(path, album: widget.folderName);
 
         widget.onDownloadComplete?.call(true);
       } else {
@@ -308,7 +307,6 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
       }
     } catch (e) {
       widget.onShareComplete?.call(false);
-      debugPrint("Share error: $e");
     } finally {
       if (mounted) {
         setState(() => _isProcessing = false);
@@ -453,39 +451,47 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
                   ),
                 ),
                 if (_isProcessing)
-                  widget.shareDownloadProgressIndicator ??
-                      Center(
-                        child: SizedBox(
-                          width: 100,
-                          height: 100,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              CircularProgressIndicator(
-                                value: _exportProgress > 0
-                                    ? _exportProgress
-                                    : null,
-                                strokeWidth: 4,
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: .5)),
+                      child: widget.shareDownloadProgressIndicator ??
+                          Center(
+                            child: SizedBox(
+                              width: 100,
+                              height: 100,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  CircularProgressIndicator(
+                                    value: _exportProgress > 0
+                                        ? _exportProgress
+                                        : null,
+                                    strokeWidth: 4,
 
-                                backgroundColor: Colors.white24, // Track color
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                  Colors.blue, // Progress color
-                                ),
+                                    backgroundColor:
+                                        Colors.white24, // Track color
+                                    valueColor:
+                                        const AlwaysStoppedAnimation<Color>(
+                                      Colors.blue, // Progress color
+                                    ),
+                                  ),
+                                  Text(
+                                    _exportProgress > 0
+                                        ? "${(_exportProgress * 100).toInt()}%"
+                                        : "",
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                _exportProgress > 0
-                                    ? "${(_exportProgress * 100).toInt()}%"
-                                    : "",
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
-                      )
+                    ),
+                  )
               ],
             ),
           ),

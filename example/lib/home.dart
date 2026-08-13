@@ -18,10 +18,10 @@ class _HomeState extends State<Home> {
   late List<bool> isVideoPage;
 
   final List<String> videoUrls = <String>[
-    // "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407",
-    // "http://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/54286548113597547617",
-    // "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/56949588480660426430",
-    // "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/63671731050165849607",
+    "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407",
+    "http://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/54286548113597547617",
+    "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/56949588480660426430",
+    "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/63671731050165849607",
     "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Fable/21332411772659771926",
     "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Fable/21332411772659771926",
     "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Fable/21332411772659771926",
@@ -135,6 +135,11 @@ class _HomeState extends State<Home> {
         videoLoader: Center(child: Text("place....")),
         videoRouteObserver: videoRouteObserver,
         onDownloadComplete: (success) {},
+        onShareComplete: (success) {},
+        onExportProgress: (progress) {},
+        onStatusChanged: (isLoading, progress) {},
+
+        // ttsText: "hello sagar bisht",
         //
         // topStripe: Container(
         //   color: Colors.green,
@@ -144,12 +149,12 @@ class _HomeState extends State<Home> {
         // ),
 
         /// these are for
-        bottomStripe: Container(
-          color: Colors.red,
-          width: double.infinity,
-          height: 70,
-          child: Text("Hello House Of tech"),
-        ),
+        // bottomStripe: Container(
+        //   color: Colors.red,
+        //   width: double.infinity,
+        //   height: 70,
+        //   child: Text("Hello House Of tech"),
+        // ),
 
         /// these is for animated overlay
         animationData: OverlayAnimationData(
@@ -164,10 +169,10 @@ class _HomeState extends State<Home> {
             return BlurNetworkImage(
               url:
                   "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
-              topLeft: 100,
-              topRight: 100,
-              bottomLeft: 100,
-              bottomRight: 100,
+              topLeft: 60,
+              topRight: 60,
+              bottomLeft: 60,
+              bottomRight: 60,
               // Convert normalized values to pixels
               width: constraints.maxWidth * 00.32637924426560605,
               height: constraints.maxHeight * 0.1835883248994034,

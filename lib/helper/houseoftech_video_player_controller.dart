@@ -26,6 +26,8 @@ class HouseOfTechController extends ChangeNotifier {
     ),
   );
 
+  bool _isDisposed = false;
+
   Future<void> initialize(
     String url, {
     bool autoPlay = false,
@@ -34,6 +36,7 @@ class HouseOfTechController extends ChangeNotifier {
   }) async {
     /// Dispose old controller if exists
     await disposeVideo();
+    if (_isDisposed) return;
 
     try {
       /// Get cached file (downloads only first time)
@@ -51,7 +54,7 @@ class HouseOfTechController extends ChangeNotifier {
       if (autoPlay) {
         await _videoController!.play();
       }
-      notifyListeners();
+      if (!_isDisposed) notifyListeners();
     } catch (e) {
       /// fallback to network if cache fails
       _videoController = VideoPlayerController.networkUrl(Uri.parse(url));
@@ -65,7 +68,7 @@ class HouseOfTechController extends ChangeNotifier {
       if (autoPlay) {
         await _videoController!.play();
       }
-      notifyListeners();
+      if (!_isDisposed) notifyListeners();
     }
   }
 
@@ -90,10 +93,14 @@ class HouseOfTechController extends ChangeNotifier {
   Future<void> disposeVideo() async {
     await _videoController?.dispose();
     _videoController = null;
-    notifyListeners();
+    if (!_isDisposed) notifyListeners();
   }
 
-  Future<void> dispose() async {
-    await disposeVideo();
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _videoController?.dispose();
+    _videoController = null;
+    super.dispose();
   }
 }
