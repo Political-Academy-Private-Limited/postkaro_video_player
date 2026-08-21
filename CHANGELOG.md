@@ -1,3 +1,5 @@
+## 1.3.0
+  - bug fixes
 ## 1.2.6
   - Download with topOverlay fix
 
