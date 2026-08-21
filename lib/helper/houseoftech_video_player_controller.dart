@@ -91,16 +91,22 @@ class HouseOfTechController extends ChangeNotifier {
   }
 
   Future<void> disposeVideo() async {
-    await _videoController?.dispose();
+    final controller = _videoController;
     _videoController = null;
-    if (!_isDisposed) notifyListeners();
+    if (controller != null) {
+      await controller.dispose();
+    }
+    if (!_isDisposed) {
+      notifyListeners();
+    }
   }
 
   @override
   void dispose() {
     _isDisposed = true;
-    _videoController?.dispose();
+    final controller = _videoController;
     _videoController = null;
+    controller?.dispose();
     super.dispose();
   }
 }
