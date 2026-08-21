@@ -143,27 +143,27 @@ class _HomeState extends State<Home> {
 
           // ttsText: "hello sagar bisht",
           //
-          // topStripe: Container(
-          //   color: Colors.green,
-          //   width: double.infinity,
-          //   height: 50,
-          //   child: Text("Hello leaders", style: TextStyle(fontSize: 37)),
-          // ),
+          topStripe: Container(
+            color: Colors.green,
+            width: double.infinity,
+            height: 50,
+            child: Text("Hello leaders", style: TextStyle(fontSize: 37)),
+          ),
 
           /// these are for
-          // bottomStripe: Container(
-          //   color: Colors.red,
-          //   width: double.infinity,
-          //   height: 70,
-          //   child: Text("Hello House Of tech"),
-          // ),
+          bottomStripe: Container(
+            color: Colors.red,
+            width: double.infinity,
+            height: 70,
+            child: Text("Hello House Of tech"),
+          ),
 
           /// these is for animated overlay
           animationData: OverlayAnimationData(
-            startOffset: Offset(1, 1),
+            startOffset: Offset(0, 0),
             // endOffset: Offset(.555555555556, .87777779),
             endOffset: Offset(1, 1),
-            duration: Duration(milliseconds: 0),
+            duration: Duration(milliseconds:8000 ),
             startDuration: Duration(milliseconds: 0),
           ),
 
@@ -183,21 +183,21 @@ class _HomeState extends State<Home> {
             },
           ),
           overlayPosition: Offset(0, 0.46856232459530184),
-          // overlayWidget1: LayoutBuilder(
-          //   builder: (context, constraints) {
-          //     return BlurNetworkImage(
-          //       url:
-          //           "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
-          //       topLeft: 0,
-          //       topRight: 0,
-          //       bottomLeft: 0,
-          //       bottomRight: 0,
-          //       // Convert normalized values to pixels
-          //       width: constraints.maxWidth * 00.4,
-          //       height: constraints.maxHeight * 0.4,
-          //     );
-          //   },
-          // ),
+          overlayWidget1: LayoutBuilder(
+            builder: (context, constraints) {
+              return BlurNetworkImage(
+                url:
+                    "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
+                topLeft: 0,
+                topRight: 0,
+                bottomLeft: 0,
+                bottomRight: 0,
+                // Convert normalized values to pixels
+                width: constraints.maxWidth * 00.4,
+                height: constraints.maxHeight * 0.4,
+              );
+            },
+          ),
           overlayPosition1: Offset(0, 1),
 
           //this is for correct dimensions

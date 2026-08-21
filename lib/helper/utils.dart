@@ -365,13 +365,14 @@ Future<String?> mergeVideoWithOverlay(
         : animSize;
 
     List<String> inputs = ["-i \"$videoPath\""];
-    List<String> filterSteps = [];
+    List<String> filterSteps = ["[0:v]fps=$animFps[v_src]"];
+    String currentV = "[v_src]";
     int inputIndex = 1;
 
     String scaleHq(int index, String label, {required String sizeExpr}) {
       // High-quality downscale + light unsharp so overlays stay crisp on video
       return "[$index:v]scale=$sizeExpr:flags=lanczos+accurate_rnd+full_chroma_int,"
-          "unsharp=5:5:0.8:5:5:0.0[$label]";
+          "unsharp=3:3:0.5:3:3:0.0[$label]";
     }
 
     String? bottomLabel;
@@ -452,8 +453,6 @@ Future<String?> mergeVideoWithOverlay(
       inputIndex++;
     }
 
-    String currentV = "[0:v]";
-
     if (bottomLabel != null) {
       filterSteps
           .add("$currentV$bottomLabel overlay=0:H-h:format=auto[v_bottom]");
@@ -489,7 +488,7 @@ Future<String?> mergeVideoWithOverlay(
     // Only fix odd sizes — avoid re-filtering the whole frame (softens overlays)
     if (vw.isOdd || vh.isOdd || topLabel != null) {
       filterSteps.add(
-        "$currentV scale=trunc(iw/2)*2:trunc(ih/2)*2:flags=neighbor[final_v]",
+        "$currentV scale=trunc(iw/2)*2:trunc(ih/2)*2:flags=bicubic+accurate_rnd[final_v]",
       );
     } else {
       filterSteps.add("$currentV format=yuv420p[final_v]");
@@ -574,9 +573,10 @@ String buildCustomAnimation({
   final ey = endY(end.dy);
 
   final p = "((t-$startTime)/$durationSec)";
+  // Smootherstep: 6p^5 - 15p^4 + 10p^3
   final progress = "if(lt(t,$startTime),0,"
       "if(gte(t,${startTime + durationSec}),1,"
-      "(3*$p*$p-2*$p*$p*$p)"
+      "(($p*$p*$p)*(($p*(($p*6.0)-15.0))+10.0))"
       "))";
   return "x='$sx+($ex-($sx))*($progress)':"
       "y='$sy+($ey-($sy))*($progress)'";

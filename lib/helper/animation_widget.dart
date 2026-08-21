@@ -168,7 +168,7 @@ class _AnimationWidgetState extends State<AnimationWidget>
     ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: Curves.easeInOut,
+        curve: Curves.easeInOutCubic,
       ),
     );
   }
