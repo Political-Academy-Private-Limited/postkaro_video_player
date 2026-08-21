@@ -23,6 +23,7 @@ dependencies:
   flutter_cache_manager: ^3.4.1
   flutter_tts: ^4.2.3
   gal: ^2.3.3
+  cached_network_image: ^3.3.1
 
 
 

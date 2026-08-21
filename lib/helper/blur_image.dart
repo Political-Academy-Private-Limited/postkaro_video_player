@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class BlurNetworkImage extends StatelessWidget {
@@ -22,11 +23,6 @@ class BlurNetworkImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dpr = MediaQuery.devicePixelRatioOf(context);
-    // Decode at 3× display size so export capture stays sharp
-    final cacheW = (width * dpr * 3).round().clamp(1, 4096);
-    final cacheH = (height * dpr * 3).round().clamp(1, 4096);
-
     return ClipRRect(
       borderRadius: BorderRadius.only(
         topLeft: Radius.circular(topLeft),
@@ -34,46 +30,16 @@ class BlurNetworkImage extends StatelessWidget {
         bottomRight: Radius.circular(bottomRight),
         bottomLeft: Radius.circular(bottomLeft),
       ),
-      child: Image.network(
-        url,
+      child: CachedNetworkImage(
+        imageUrl: url,
         height: height,
         width: width,
         fit: BoxFit.cover,
         filterQuality: FilterQuality.high,
-        isAntiAlias: true,
-        cacheWidth: cacheW,
-        cacheHeight: cacheH,
+        placeholder: (context, url) => Center(
+          child: CircularProgressIndicator(),
+        ),
       ),
     );
-  }
-}
-
-class BottomWaveClipper extends CustomClipper<Path> {
-  final double curveDepth;
-
-  BottomWaveClipper({required this.curveDepth});
-
-  @override
-  Path getClip(Size size) {
-    Path path = Path();
-
-    path.lineTo(0, size.height - curveDepth);
-
-    path.quadraticBezierTo(
-      size.width / 2,
-      size.height + curveDepth,
-      size.width,
-      size.height - curveDepth,
-    );
-
-    path.lineTo(size.width, 0);
-    path.close();
-
-    return path;
-  }
-
-  @override
-  bool shouldReclip(covariant BottomWaveClipper oldClipper) {
-    return oldClipper.curveDepth != curveDepth;
   }
 }

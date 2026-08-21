@@ -41,6 +41,8 @@ class OverlayAnimationData {
 
 
 
+
+
     if (x <= 0) {
       x = x - animSize.width;
     } else if (x >= 1) {
