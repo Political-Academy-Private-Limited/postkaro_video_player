@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:example/test_class.dart';
 import 'package:flutter/material.dart';
+import 'package:houseoftech_video_player/helper/animation_model.dart';
 import 'package:houseoftech_video_player/houseoftech_video_player.dart';
 
 import 'main.dart';
@@ -126,98 +127,102 @@ class _HomeState extends State<Home> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 80),
-      child: HotVideoPlayerOverlay(
-        url: videoUrl,
-        aspectRatio: 9 / 16,
-        reelsMode: true,
-        downloadWithOverlay: true,
-        isMute: true,
-        videoLoader: Center(child: Text("place....")),
-        videoRouteObserver: videoRouteObserver,
-        onDownloadComplete: (success) {},
-        onShareComplete: (success) {},
-        onExportProgress: (progress) {},
-        onStatusChanged: (isLoading, progress) {},
+      child: HotAnimationVideo(
+        animData: AnimationModel(
+          url: videoUrl,
+          aspectRatio: 9 / 16,
+          reelsMode: true,
+          downloadWithOverlay: true,
+          isMute: true,
+          videoLoader: Center(child: Text("place....")),
+          videoRouteObserver: videoRouteObserver,
+          onDownloadComplete: (success) {},
+          onShareComplete: (success) {},
+          onExportProgress: (progress) {},
+          onStatusChanged: (isLoading, progress) {},
 
-        // ttsText: "hello sagar bisht",
-        //
-        // topStripe: Container(
-        //   color: Colors.green,
-        //   width: double.infinity,
-        //   height: 50,
-        //   child: Text("Hello leaders", style: TextStyle(fontSize: 37)),
-        // ),
+          // ttsText: "hello sagar bisht",
+          //
+          // topStripe: Container(
+          //   color: Colors.green,
+          //   width: double.infinity,
+          //   height: 50,
+          //   child: Text("Hello leaders", style: TextStyle(fontSize: 37)),
+          // ),
 
-        /// these are for
-        // bottomStripe: Container(
-        //   color: Colors.red,
-        //   width: double.infinity,
-        //   height: 70,
-        //   child: Text("Hello House Of tech"),
-        // ),
+          /// these are for
+          // bottomStripe: Container(
+          //   color: Colors.red,
+          //   width: double.infinity,
+          //   height: 70,
+          //   child: Text("Hello House Of tech"),
+          // ),
 
-        /// these is for animated overlay
-        animationData: OverlayAnimationData(
-          startOffset: Offset(0, 0),
-          endOffset: Offset(.555555555556, .87777779),
-          duration: Duration(milliseconds: 5000),
-          startDuration: Duration(milliseconds: 3000),
+          /// these is for animated overlay
+          animationData: OverlayAnimationData(
+            startOffset: Offset(1, 1),
+            // endOffset: Offset(.555555555556, .87777779),
+            endOffset: Offset(0, 0),
+            duration: Duration(milliseconds: 8000),
+            startDuration: Duration(milliseconds: 0),
+          ),
+
+          animatedOverlay: LayoutBuilder(
+            builder: (context, constraints) {
+              return BlurNetworkImage(
+                url:
+                    "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
+                topLeft: 0,
+                topRight: 0,
+                bottomLeft: 0,
+                bottomRight: 0,
+                // Convert normalized values to pixels
+                width: constraints.maxWidth * 00.32637924426560605,
+                height: constraints.maxHeight * 0.1835883248994034,
+              );
+            },
+          ),
+          overlayPosition: Offset(0, 0.46856232459530184),
+          // overlayWidget1: LayoutBuilder(
+          //   builder: (context, constraints) {
+          //     return BlurNetworkImage(
+          //       url:
+          //           "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
+          //       topLeft: 100,
+          //       topRight: 100,
+          //       bottomLeft: 100,
+          //       bottomRight: 100,
+          //       // Convert normalized values to pixels
+          //       width: constraints.maxWidth * 00.32637924426560605,
+          //       height: constraints.maxHeight * 0.1835883248994034,
+          //     );
+          //   },
+          // ),
+          overlayPosition1: Offset(0, 1),
+
+          //this is for correct dimensions
+          // animatedOverlay: LayoutBuilder(
+          //   builder: (context, constraints) {
+          //     return BlurNetworkImage(
+          //       url:
+          //           "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/63671731050165849607.png",
+          //       topLeft: 100,
+          //       topRight: 100,
+          //       bottomLeft: 100,
+          //       bottomRight: 100,
+          //       // Convert normalized values to pixels
+          //       width: constraints.maxWidth * 00.32637924426560605,
+          //       height: constraints.maxHeight * 0.1835883248994034,
+          //     );
+          //   },
+          // ),
+
+          ///if you want reel mode, controller is not necessary
+          // controller: ctrl,
+          // ttsText:
+          //     "बिना फल की आसक्ति के, अपने कर्तव्यों (काम) को समर्पण के साथ करना ही सच्चा कर्मयोग है।",
         ),
-
-        animatedOverlay: LayoutBuilder(
-          builder: (context, constraints) {
-            return BlurNetworkImage(
-              url:
-                  "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
-              topLeft: 60,
-              topRight: 60,
-              bottomLeft: 60,
-              bottomRight: 60,
-              // Convert normalized values to pixels
-              width: constraints.maxWidth * 00.32637924426560605,
-              height: constraints.maxHeight * 0.1835883248994034,
-            );
-          },
-        ),
-        overlayPosition: Offset(0, 0.46856232459530184),
-        // overlayWidget1: LayoutBuilder(
-        //   builder: (context, constraints) {
-        //     return BlurNetworkImage(
-        //       url:
-        //           "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
-        //       topLeft: 100,
-        //       topRight: 100,
-        //       bottomLeft: 100,
-        //       bottomRight: 100,
-        //       // Convert normalized values to pixels
-        //       width: constraints.maxWidth * 00.32637924426560605,
-        //       height: constraints.maxHeight * 0.1835883248994034,
-        //     );
-        //   },
-        // ),
-        overlayPosition1: Offset(0, 1),
-
-        //this is for correct dimensions
-        // animatedOverlay: LayoutBuilder(
-        //   builder: (context, constraints) {
-        //     return BlurNetworkImage(
-        //       url:
-        //           "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/63671731050165849607.png",
-        //       topLeft: 100,
-        //       topRight: 100,
-        //       bottomLeft: 100,
-        //       bottomRight: 100,
-        //       // Convert normalized values to pixels
-        //       width: constraints.maxWidth * 00.32637924426560605,
-        //       height: constraints.maxHeight * 0.1835883248994034,
-        //     );
-        //   },
-        // ),
-
-        ///if you want reel mode, controller is not necessary
-        // controller: ctrl,
-        // ttsText:
-        //     "बिना फल की आसक्ति के, अपने कर्तव्यों (काम) को समर्पण के साथ करना ही सच्चा कर्मयोग है।",
+        animSize: Size(00.32637924426560605, 0.1835883248994034),
       ),
     );
   }

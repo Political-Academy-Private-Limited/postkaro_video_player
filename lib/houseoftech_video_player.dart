@@ -16,7 +16,6 @@
 /// )
 /// ```
 
-
 library;
 
 export 'src/houseoftech_video_player_widget.dart';
@@ -25,3 +24,4 @@ export 'src/houseoftech_overlay_video_widget.dart';
 export 'helper/overlay_animation_type.dart';
 export 'helper/blur_image.dart';
 export 'src/video_route_observer.dart';
+export 'src/hot_animation_video.dart';
