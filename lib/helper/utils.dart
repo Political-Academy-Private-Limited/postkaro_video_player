@@ -74,9 +74,9 @@ Future<CapturedOverlay?> captureOverlay(
     final dpr = pixelRatio ?? mediaDpr ?? 2.0;
 
     // Higher ratio = sharper overlay (lanczos downscales cleanly later)
-    final ratio = dpr.clamp(2.0, 6.0);
+    final ratio = dpr.clamp(3.0, 8.0);
 
-    await Future.delayed(const Duration(milliseconds: 16));
+    await Future.delayed(const Duration(milliseconds: 32));
 
     final ui.Image image = await boundary.toImage(pixelRatio: ratio);
     final ByteData? byteData =
@@ -369,7 +369,9 @@ Future<String?> mergeVideoWithOverlay(
     int inputIndex = 1;
 
     String scaleHq(int index, String label, {required String sizeExpr}) {
-      return "[$index:v]scale=$sizeExpr:flags=lanczos:param0=3[$label]";
+      // High-quality downscale + light unsharp so overlays stay crisp on video
+      return "[$index:v]scale=$sizeExpr:flags=lanczos+accurate_rnd+full_chroma_int,"
+          "unsharp=5:5:0.8:5:5:0.0[$label]";
     }
 
     String? bottomLabel;
@@ -484,7 +486,14 @@ Future<String?> mergeVideoWithOverlay(
       currentV = "[v_stacked]";
     }
 
-    filterSteps.add("$currentV scale=trunc(iw/2)*2:trunc(ih/2)*2:flags=lanczos[final_v]");
+    // Only fix odd sizes — avoid re-filtering the whole frame (softens overlays)
+    if (vw.isOdd || vh.isOdd || topLabel != null) {
+      filterSteps.add(
+        "$currentV scale=trunc(iw/2)*2:trunc(ih/2)*2:flags=neighbor[final_v]",
+      );
+    } else {
+      filterSteps.add("$currentV format=yuv420p[final_v]");
+    }
     const finalLabel = "[final_v]";
 
     String audioMapping;
@@ -497,9 +506,9 @@ Future<String?> mergeVideoWithOverlay(
       audioMapping = "-map 0:a? -c:a copy";
     }
 
-    // Higher quality encode (still relatively fast)
+    // Sharper encode — still reasonably fast
     const vCodec = "libx264";
-    const vCodecParams = "-preset veryfast -crf 18";
+    const vCodecParams = "-preset fast -crf 16";
 
     final filterComplex = filterSteps.join(";");
     final command = "-y ${inputs.join(" ")} "

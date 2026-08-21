@@ -39,6 +39,8 @@ class OverlayAnimationData {
     double x = startOffset.dx;
     double y = startOffset.dy;
 
+
+
     if (x <= 0) {
       x = x - animSize.width;
     } else if (x >= 1) {

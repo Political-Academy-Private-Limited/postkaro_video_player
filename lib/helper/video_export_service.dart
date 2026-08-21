@@ -39,41 +39,38 @@ Future<String?> exportVideoWithOverlay({
     final info = await getVideoInfo(videoPath);
     if (info == null) return null;
 
-    // Supersample ~2x video density for sharp lanczos downscale
+    // Supersample 3× video density for sharp lanczos downscale
     final mediaDpr = playerKey?.currentContext != null
-        ? MediaQuery.maybeOf(playerKey!.currentContext!)?.devicePixelRatio ?? 2.0
-        : 2.0;
+        ? MediaQuery.maybeOf(playerKey!.currentContext!)?.devicePixelRatio ??
+            3.0
+        : 3.0;
     final videoRatio = (playerSize != null && playerSize.width > 0)
         ? info.width / playerSize.width
         : mediaDpr;
     final captureRatio =
-        math.max(videoRatio * 2.0, mediaDpr * 2.0).clamp(2.0, 6.0);
+        math.max(videoRatio * 3.0, mediaDpr * 3.0).clamp(3.0, 8.0);
+
+    // Let network images finish decoding at high cache resolution
+    await Future.delayed(const Duration(milliseconds: 200));
 
     final capturesFuture = Future.wait<CapturedOverlay?>([
       bottomOverlayKey != null
-          ? captureOverlay(
-              bottomOverlayKey, "bottomOverlay",
+          ? captureOverlay(bottomOverlayKey, "bottomOverlay",
               pixelRatio: captureRatio)
           : Future.value(null),
       topOverlayKey != null
-          ? captureOverlay(
-              topOverlayKey, "topOverlay",
+          ? captureOverlay(topOverlayKey, "topOverlay",
               pixelRatio: captureRatio)
           : Future.value(null),
       animatedOverlayKey != null
-          ? captureOverlay(
-              animatedOverlayKey, "animatedOverlay",
+          ? captureOverlay(animatedOverlayKey, "animatedOverlay",
               pixelRatio: captureRatio)
           : Future.value(null),
       overlayKey != null
-          ? captureOverlay(
-              overlayKey, "overlayKey",
-              pixelRatio: captureRatio)
+          ? captureOverlay(overlayKey, "overlayKey", pixelRatio: captureRatio)
           : Future.value(null),
       overlayKey1 != null
-          ? captureOverlay(
-              overlayKey1, "overlayKey1",
-              pixelRatio: captureRatio)
+          ? captureOverlay(overlayKey1, "overlayKey1", pixelRatio: captureRatio)
           : Future.value(null),
     ]);
 

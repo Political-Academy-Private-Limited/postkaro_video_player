@@ -22,6 +22,11 @@ class BlurNetworkImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    // Decode at 3× display size so export capture stays sharp
+    final cacheW = (width * dpr * 3).round().clamp(1, 4096);
+    final cacheH = (height * dpr * 3).round().clamp(1, 4096);
+
     return ClipRRect(
       borderRadius: BorderRadius.only(
         topLeft: Radius.circular(topLeft),
@@ -34,6 +39,10 @@ class BlurNetworkImage extends StatelessWidget {
         height: height,
         width: width,
         fit: BoxFit.cover,
+        filterQuality: FilterQuality.high,
+        isAntiAlias: true,
+        cacheWidth: cacheW,
+        cacheHeight: cacheH,
       ),
     );
   }
