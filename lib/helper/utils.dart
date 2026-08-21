@@ -15,11 +15,49 @@ import 'package:share_plus/share_plus.dart';
 
 import 'overlay_animation_type.dart';
 
+/// Result of capturing an overlay widget for export.
+class CapturedOverlay {
+  final String path;
+
+  /// Logical size of the captured widget (same units as the player layout).
+  final Size logicalSize;
+
+  const CapturedOverlay({
+    required this.path,
+    required this.logicalSize,
+  });
+}
+
+int _even(int value) {
+  if (value < 2) return 2;
+  return value - (value % 2);
+}
+
+/// Maps an on-screen logical size into exact video pixel dimensions.
+Size overlayPixelSize({
+  required Size overlayLogical,
+  required Size playerLogical,
+  required int videoWidth,
+  required int videoHeight,
+}) {
+  if (playerLogical.width <= 0 || playerLogical.height <= 0) {
+    return Size(videoWidth.toDouble(), videoHeight.toDouble());
+  }
+
+  final w = (overlayLogical.width / playerLogical.width * videoWidth).round();
+  final h =
+      (overlayLogical.height / playerLogical.height * videoHeight).round();
+  return Size(_even(w).toDouble(), _even(h).toDouble());
+}
+
 /// ===============================
-/// CAPTURE OVERLAY (High Quality)
+/// CAPTURE OVERLAY
 /// ===============================
-///
-Future<String?> captureOverlay(GlobalKey key, String fileName) async {
+Future<CapturedOverlay?> captureOverlay(
+  GlobalKey key,
+  String fileName, {
+  double? pixelRatio,
+}) async {
   try {
     if (key.currentContext == null) {
       await Future.delayed(const Duration(milliseconds: 50));
@@ -31,25 +69,38 @@ Future<String?> captureOverlay(GlobalKey key, String fileName) async {
 
     if (boundary == null || boundary.size.isEmpty) return null;
 
-    final pixelRatio = MediaQuery.of(key.currentContext!).devicePixelRatio * 2;
+    final logicalSize = boundary.size;
+    final mediaDpr = MediaQuery.maybeOf(key.currentContext!)?.devicePixelRatio;
+    final dpr = pixelRatio ?? mediaDpr ?? 2.0;
 
-    final ui.Image image = await boundary.toImage(pixelRatio: pixelRatio);
+    // Higher ratio = sharper overlay (lanczos downscales cleanly later)
+    final ratio = dpr.clamp(2.0, 6.0);
+
+    await Future.delayed(const Duration(milliseconds: 16));
+
+    final ui.Image image = await boundary.toImage(pixelRatio: ratio);
     final ByteData? byteData =
         await image.toByteData(format: ui.ImageByteFormat.png);
+    image.dispose();
 
     if (byteData == null) return null;
 
-    final Uint8List pngBytes = byteData.buffer.asUint8List();
-
     final Directory tempDir = await getTemporaryDirectory();
     final File imageFile = File('${tempDir.path}/${fileName}_overlay.png');
+    await imageFile.writeAsBytes(byteData.buffer.asUint8List(), flush: false);
 
-    await imageFile.writeAsBytes(pngBytes);
-
-    return imageFile.path;
+    return CapturedOverlay(path: imageFile.path, logicalSize: logicalSize);
   } catch (e) {
     rethrow;
   }
+}
+
+Size? readWidgetSize(GlobalKey key) {
+  final ctx = key.currentContext;
+  if (ctx == null) return null;
+  final box = ctx.findRenderObject() as RenderBox?;
+  if (box == null || !box.hasSize || box.size.isEmpty) return null;
+  return box.size;
 }
 
 ///
@@ -138,8 +189,6 @@ Future<String?> downloadVideo(String videoUrl) async {
     final videoFile = File('${tempDir.path}/$videoFileName');
     if (await videoFile.exists()) {
       return videoFile.path;
-
-      /// Already downloaded
     }
 
     final response = await http.get(Uri.parse(videoUrl));
@@ -156,7 +205,7 @@ Future<String?> downloadVideo(String videoUrl) async {
 }
 
 /// ===============================
-/// GET VIDEO RESOLUTION (FFprobe)
+/// GET VIDEO INFO
 /// ===============================
 Future<Map<String, int>?> getVideoResolution(String path) async {
   try {
@@ -178,7 +227,7 @@ Future<Map<String, int>?> getVideoResolution(String path) async {
       "height": int.parse(parts[1]),
     };
   } catch (_) {
-    rethrow;
+    return null;
   }
 }
 
@@ -199,11 +248,49 @@ Future<double?> getVideoDuration(String path) async {
   }
 }
 
+Future<double> getVideoFps(String path) async {
+  try {
+    final session = await FFprobeKit.execute(
+      '-v error -select_streams v:0 '
+      '-show_entries stream=r_frame_rate '
+      '-of default=noprint_wrappers=1:nokey=1 "$path"',
+    );
+    final output = (await session.getOutput())?.trim();
+    if (output == null || output.isEmpty) return 30;
+
+    if (output.contains('/')) {
+      final parts = output.split('/');
+      final num_ = double.tryParse(parts[0]) ?? 30;
+      final den = double.tryParse(parts[1]) ?? 1;
+      if (den == 0) return 30;
+      final fps = num_ / den;
+      if (fps.isNaN || fps <= 0 || fps > 120) return 30;
+      return fps;
+    }
+    return double.tryParse(output) ?? 30;
+  } catch (_) {
+    return 30;
+  }
+}
+
+Future<({int width, int height, double duration, double fps})?> getVideoInfo(
+  String path,
+) async {
+  final resolution = await getVideoResolution(path);
+  final duration = await getVideoDuration(path);
+  if (resolution == null || duration == null) return null;
+  final fps = await getVideoFps(path);
+  return (
+    width: resolution['width']!,
+    height: resolution['height']!,
+    duration: duration,
+    fps: fps,
+  );
+}
+
 /// ===============================
 /// SHARE VIDEO
 /// ===============================
-///
-
 Future<void> shareVideo(String path, String? shareText) async {
   final params = ShareParams(
     text: shareText,
@@ -218,20 +305,25 @@ Future<void> shareVideo(String path, String? shareText) async {
 }
 
 /// ===============================
-/// MERGE VIDEO + OVERLAY (Optimal)
+/// MERGE VIDEO + OVERLAY
 /// ===============================
 Future<String?> mergeVideoWithOverlay(
   String videoPath,
-  String? bottomOverlayPath, {
-  String? topOverlayPath,
-  String? animatedOverlayPath,
-  String? overlayWidgetPath,
+  CapturedOverlay? bottomOverlay, {
+  CapturedOverlay? topOverlay,
+  CapturedOverlay? animatedOverlay,
+  CapturedOverlay? overlayWidget,
   Offset? overlayWidgetOffSet,
-  String? overlayWidgetPath1,
+  CapturedOverlay? overlayWidget1,
   Offset? overlayWidgetOffSet1,
   String? audioFilePath,
   required OverlayAnimationData animationData,
   Size? animSize,
+  Size? playerLogicalSize,
+  int? videoWidth,
+  int? videoHeight,
+  double? videoDuration,
+  double? videoFps,
   void Function(double progress)? onProgress,
 }) async {
   try {
@@ -239,72 +331,118 @@ Future<String?> mergeVideoWithOverlay(
     final outputPath =
         "${dir.path}/final_${DateTime.now().millisecondsSinceEpoch}.mp4";
 
-    final resolution = await getVideoResolution(videoPath);
-    if (resolution == null) return null;
+    late final int vw;
+    late final int vh;
+    late final double duration;
+    late final double fps;
 
-    final duration = await getVideoDuration(videoPath);
-    if (duration == null) return null;
+    if (videoWidth != null && videoHeight != null && videoDuration != null) {
+      vw = videoWidth;
+      vh = videoHeight;
+      duration = videoDuration;
+      fps = videoFps ?? await getVideoFps(videoPath);
+    } else {
+      final info = await getVideoInfo(videoPath);
+      if (info == null) return null;
+      vw = info.width;
+      vh = info.height;
+      duration = info.duration;
+      fps = info.fps;
+    }
 
-    final int videoWidth = resolution['width']!;
-    final int videoHeight = resolution['height']!;
+    // Animate at least at source fps (min 30) so motion isn't stepped
+    final animFps = fps < 30 ? 30.0 : fps;
+
+    final playerSize = playerLogicalSize;
+    final Size? derivedAnimSize = (animatedOverlay != null &&
+            playerSize != null &&
+            playerSize.width > 0 &&
+            playerSize.height > 0)
+        ? Size(
+            animatedOverlay.logicalSize.width / playerSize.width,
+            animatedOverlay.logicalSize.height / playerSize.height,
+          )
+        : animSize;
 
     List<String> inputs = ["-i \"$videoPath\""];
     List<String> filterSteps = [];
     int inputIndex = 1;
 
-    /// Bottom overlay (optional)
+    String scaleHq(int index, String label, {required String sizeExpr}) {
+      return "[$index:v]scale=$sizeExpr:flags=lanczos:param0=3[$label]";
+    }
+
     String? bottomLabel;
-    if (bottomOverlayPath != null) {
-      inputs.add("-i \"$bottomOverlayPath\"");
-      filterSteps.add("[$inputIndex:v]scale=$videoWidth:-1[bottom]");
+    if (bottomOverlay != null) {
+      inputs.add("-i \"${bottomOverlay.path}\"");
+      filterSteps.add(scaleHq(inputIndex, "bottom", sizeExpr: "$vw:-2"));
       bottomLabel = "[bottom]";
       inputIndex++;
     }
 
-    /// Top overlay (optional)
     String? topLabel;
-    if (topOverlayPath != null) {
-      inputs.add("-i \"$topOverlayPath\"");
-      filterSteps.add("[$inputIndex:v]scale=$videoWidth:-1[top]");
+    if (topOverlay != null) {
+      inputs.add("-i \"${topOverlay.path}\"");
+      filterSteps.add(scaleHq(inputIndex, "top", sizeExpr: "$vw:-2"));
       topLabel = "[top]";
       inputIndex++;
     }
 
-    /// Animated overlay — scale to real overlay size so (W-w)*offset works
     String? animLabel;
-    if (animatedOverlayPath != null) {
-      inputs.add("-loop 1 -t $duration -i \"$animatedOverlayPath\"");
-      if (animSize != null) {
-        final aw = (videoWidth * animSize.width).round();
-        final ah = (videoHeight * animSize.height).round();
-        final evenW = aw < 2 ? 2 : aw - (aw % 2);
-        final evenH = ah < 2 ? 2 : ah - (ah % 2);
-        filterSteps.add("[$inputIndex:v]scale=$evenW:$evenH[anim]");
+    if (animatedOverlay != null) {
+      // High framerate still loop — without this, animation is choppy
+      inputs.add(
+        "-loop 1 -framerate $animFps -t $duration -i \"${animatedOverlay.path}\"",
+      );
+      final Size target;
+      if (playerSize != null) {
+        target = overlayPixelSize(
+          overlayLogical: animatedOverlay.logicalSize,
+          playerLogical: playerSize,
+          videoWidth: vw,
+          videoHeight: vh,
+        );
+      } else if (derivedAnimSize != null) {
+        target = Size(
+          _even((vw * derivedAnimSize.width).round()).toDouble(),
+          _even((vh * derivedAnimSize.height).round()).toDouble(),
+        );
       } else {
-        filterSteps.add("[$inputIndex:v]scale=$videoWidth:-1[anim]");
+        target = Size(vw.toDouble(), vh.toDouble());
       }
+      final tw = target.width.toInt().clamp(2, vw);
+      final th = target.height.toInt().clamp(2, vh);
+      filterSteps.add(
+        scaleHq(
+          inputIndex,
+          "anim",
+          sizeExpr: "${_even(tw)}:${_even(th)}",
+        ),
+      );
       animLabel = "[anim]";
       inputIndex++;
     }
 
-    /// Overlay widgets
     String? widgetLabel;
-    if (overlayWidgetPath != null) {
-      inputs.add("-i \"$overlayWidgetPath\"");
-      filterSteps.add("[$inputIndex:v]scale=$videoWidth:-1[widget]");
+    if (overlayWidget != null) {
+      inputs.add("-i \"${overlayWidget.path}\"");
+      filterSteps.add(
+        scaleHq(inputIndex, "widget", sizeExpr: "${_even(vw)}:${_even(vh)}"),
+      );
       widgetLabel = "[widget]";
       inputIndex++;
     }
 
     String? widgetLabel1;
-    if (overlayWidgetPath1 != null) {
-      inputs.add("-i \"$overlayWidgetPath1\"");
-      filterSteps.add("[$inputIndex:v]scale=$videoWidth:-1[widget1]");
+    if (overlayWidget1 != null) {
+      inputs.add("-i \"${overlayWidget1.path}\"");
+      filterSteps.add(
+        scaleHq(inputIndex, "widget1", sizeExpr: "${_even(vw)}:${_even(vh)}"),
+      );
       widgetLabel1 = "[widget1]";
       inputIndex++;
     }
 
-    /// Audio input
     int? audioInputIndex;
     if (audioFilePath != null) {
       inputs.add("-i \"$audioFilePath\"");
@@ -312,82 +450,66 @@ Future<String?> mergeVideoWithOverlay(
       inputIndex++;
     }
 
-    /// Start building the filter complex graph
     String currentV = "[0:v]";
-    filterSteps.add("$currentV setpts=PTS-STARTPTS[base]");
-    currentV = "[base]";
 
-    /// 1. Apply Bottom Overlay
     if (bottomLabel != null) {
-      filterSteps.add("$currentV$bottomLabel overlay=0:H-h[v_bottom]");
+      filterSteps
+          .add("$currentV$bottomLabel overlay=0:H-h:format=auto[v_bottom]");
       currentV = "[v_bottom]";
     }
 
-    /// 2. Apply Animated Overlay
     if (animLabel != null) {
       final animationExpr = buildCustomAnimation(
         animData: animationData,
-        animSize: animSize,
+        animSize: derivedAnimSize,
       );
-      filterSteps.add("$currentV$animLabel overlay=$animationExpr[v_anim]");
+      filterSteps.add(
+        "$currentV$animLabel overlay=$animationExpr:format=auto[v_anim]",
+      );
       currentV = "[v_anim]";
     }
 
-    /// 3. Apply Overlay Widget 1
     if (widgetLabel != null) {
-      final x = endX(overlayWidgetOffSet?.dx ?? 0);
-      final y = endY(overlayWidgetOffSet?.dy ?? 0);
-      filterSteps.add("$currentV$widgetLabel overlay=x=$x:y=$y[v_w1]");
+      filterSteps.add("$currentV$widgetLabel overlay=0:0:format=auto[v_w1]");
       currentV = "[v_w1]";
     }
 
-    /// 4. Apply Overlay Widget 2
     if (widgetLabel1 != null) {
-      final x = endX(overlayWidgetOffSet1?.dx ?? 0);
-      final y = endY(overlayWidgetOffSet1?.dy ?? 0);
-      filterSteps.add("$currentV$widgetLabel1 overlay=x=$x:y=$y[v_w2]");
+      filterSteps.add("$currentV$widgetLabel1 overlay=0:0:format=auto[v_w2]");
       currentV = "[v_w2]";
     }
 
-    /// 5. Apply Top Overlay (vstack)
     if (topLabel != null) {
       filterSteps.add("$topLabel$currentV vstack=inputs=2[v_stacked]");
       currentV = "[v_stacked]";
     }
 
-    /// 6. Ensure even dimensions for libx264
-    filterSteps.add("$currentV scale=trunc(iw/2)*2:trunc(ih/2)*2[final_v]");
+    filterSteps.add("$currentV scale=trunc(iw/2)*2:trunc(ih/2)*2:flags=lanczos[final_v]");
+    const finalLabel = "[final_v]";
 
-    /// Audio Processing: Mix TTS with original audio if present
-    String audioMapping = "";
+    String audioMapping;
     if (audioFilePath != null && audioInputIndex != null) {
       filterSteps.add(
-          "[0:a][$audioInputIndex:a]amix=inputs=2:duration=first:dropout_transition=2[a]");
-      audioMapping = "-map \"[a]\" -c:a aac -b:a 128k";
+        "[0:a][$audioInputIndex:a]amix=inputs=2:duration=first:dropout_transition=2[a]",
+      );
+      audioMapping = '-map "[a]" -c:a aac -b:a 128k';
     } else {
       audioMapping = "-map 0:a? -c:a copy";
     }
 
-    // Use Hardware Acceleration if possible
-    String vCodec = "libx264";
-    String vCodecParams = "-preset ultrafast -crf 23";
-
-    if (Platform.isAndroid) {
-      vCodec = "h264_mediacodec";
-      vCodecParams =
-          "-b:v 4M"; // Bitrate is usually better for hardware encoders
-    } else if (Platform.isIOS) {
-      vCodec = "h264_videotoolbox";
-      vCodecParams = "-b:v 4M";
-    }
+    // Higher quality encode (still relatively fast)
+    const vCodec = "libx264";
+    const vCodecParams = "-preset veryfast -crf 18";
 
     final filterComplex = filterSteps.join(";");
     final command = "-y ${inputs.join(" ")} "
         "-filter_complex \"$filterComplex\" "
-        "-map \"[final_v]\" $audioMapping "
+        "-map \"$finalLabel\" $audioMapping "
         "-c:v $vCodec $vCodecParams "
         "-pix_fmt yuv420p -movflags +faststart "
         "\"$outputPath\"";
+
+    debugPrint("Export FFmpeg: $command");
 
     if (onProgress != null) {
       FFmpegKitConfig.enableStatisticsCallback((stats) {
@@ -409,63 +531,42 @@ Future<String?> mergeVideoWithOverlay(
 
     if (ReturnCode.isSuccess(returnCode)) {
       return File(outputPath).existsSync() ? outputPath : null;
-    } else {
-      return null;
     }
-  } catch (e) {
+
+    debugPrint("Export FFmpeg failed: ${await session.getAllLogsAsString()}");
+    return null;
+  } catch (e, st) {
+    debugPrint("Export merge error: $e\n$st");
     return null;
   }
 }
 
-///
-/// Custom animation merger
-///
+String startX(double value) => "(W-w)*$value";
 
-class OverlayPoint {
-  final double x;
-  final double y;
+String startY(double value) => "(H-h)*$value";
 
-  const OverlayPoint(this.x, this.y);
-}
+String endX(double value) => "(W-w)*$value";
 
-///new logic
-
-String startX(double value) {
-  return "(W-w)*$value";
-}
-
-String startY(double value) {
-  return "(H-h)*$value";
-}
-
-String endX(double value) {
-  return "(W-w)*$value";
-}
-
-String endY(double value) {
-  return "(H-h)*$value";
-}
+String endY(double value) => "(H-h)*$value";
 
 String buildCustomAnimation({
   required OverlayAnimationData animData,
   Size? animSize,
 }) {
-  // Start from the original offset, then push outside (same as setOutside).
   final start = animData.withOutsideStart(animSize).startOffset;
   final end = animData.endOffset;
 
   final startTime = animData.startDuration.inMilliseconds / 1000.0;
-  final duration = animData.duration.inMilliseconds / 1000.0;
+  final durationSec = animData.duration.inMilliseconds / 1000.0;
 
   final sx = startX(start.dx);
   final sy = startY(start.dy);
-
   final ex = endX(end.dx);
   final ey = endY(end.dy);
 
-  final p = "((t-$startTime)/$duration)";
+  final p = "((t-$startTime)/$durationSec)";
   final progress = "if(lt(t,$startTime),0,"
-      "if(gte(t,${startTime + duration}),1,"
+      "if(gte(t,${startTime + durationSec}),1,"
       "(3*$p*$p-2*$p*$p*$p)"
       "))";
   return "x='$sx+($ex-($sx))*($progress)':"

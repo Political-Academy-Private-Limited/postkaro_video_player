@@ -160,9 +160,9 @@ class _HomeState extends State<Home> {
 
           /// these is for animated overlay
           animationData: OverlayAnimationData(
-            startOffset: Offset(1, 1),
+            startOffset: Offset(0, 0),
             // endOffset: Offset(.555555555556, .87777779),
-            endOffset: Offset(0, 0),
+            endOffset: Offset(1, 1),
             duration: Duration(milliseconds: 8000),
             startDuration: Duration(milliseconds: 0),
           ),
@@ -172,32 +172,32 @@ class _HomeState extends State<Home> {
               return BlurNetworkImage(
                 url:
                     "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
+                topLeft: 100,
+                topRight: 100,
+                bottomLeft: 100,
+                bottomRight: 100,
+                // Convert normalized values to pixels
+                width: constraints.maxWidth * 00.4,
+                height: constraints.maxHeight * 0.4,
+              );
+            },
+          ),
+          overlayPosition: Offset(0, 0.46856232459530184),
+          overlayWidget1: LayoutBuilder(
+            builder: (context, constraints) {
+              return BlurNetworkImage(
+                url:
+                    "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
                 topLeft: 0,
                 topRight: 0,
                 bottomLeft: 0,
                 bottomRight: 0,
                 // Convert normalized values to pixels
-                width: constraints.maxWidth * 00.32637924426560605,
-                height: constraints.maxHeight * 0.1835883248994034,
+                width: constraints.maxWidth * 00.4,
+                height: constraints.maxHeight * 0.4,
               );
             },
           ),
-          overlayPosition: Offset(0, 0.46856232459530184),
-          // overlayWidget1: LayoutBuilder(
-          //   builder: (context, constraints) {
-          //     return BlurNetworkImage(
-          //       url:
-          //           "https://res.cloudinary.com/dlorfgn2x/video/upload/q_auto,f_auto/Sanatan/post/53293854424951926407.png",
-          //       topLeft: 100,
-          //       topRight: 100,
-          //       bottomLeft: 100,
-          //       bottomRight: 100,
-          //       // Convert normalized values to pixels
-          //       width: constraints.maxWidth * 00.32637924426560605,
-          //       height: constraints.maxHeight * 0.1835883248994034,
-          //     );
-          //   },
-          // ),
           overlayPosition1: Offset(0, 1),
 
           //this is for correct dimensions
@@ -222,7 +222,7 @@ class _HomeState extends State<Home> {
           // ttsText:
           //     "बिना फल की आसक्ति के, अपने कर्तव्यों (काम) को समर्पण के साथ करना ही सच्चा कर्मयोग है।",
         ),
-        animSize: Size(00.32637924426560605, 0.1835883248994034),
+        animSize: Size(00.4, 0.4),
       ),
     );
   }

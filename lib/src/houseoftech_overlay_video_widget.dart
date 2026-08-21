@@ -212,6 +212,7 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
   final GlobalKey _animatedOverlayKey = GlobalKey();
   final GlobalKey _overlayKey = GlobalKey();
   final GlobalKey _overlayKey1 = GlobalKey();
+  final GlobalKey _playerKey = GlobalKey();
 
   bool _isProcessing = false;
   bool isVideoLoading = false;
@@ -238,8 +239,11 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
     setState(() {
       _exportProgress = 0;
     });
+    // Wait one frame so overlay RepaintBoundaries are painted.
+    await Future.delayed(const Duration(milliseconds: 50));
     return exportVideoWithOverlay(
       videoUrl: widget.url,
+      playerKey: _playerKey,
       overlayKey: widget.overlayWidget == null ? null : _overlayKey,
       overlayKey1: widget.overlayWidget1 == null ? null : _overlayKey1,
       overlayOffSet: widget.overlayPosition,
@@ -331,6 +335,7 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
         Expanded(
           child: ClipRRect(
             child: Stack(
+              key: _playerKey,
               children: [
                 Positioned.fill(
                   child: HouseOfTechVideoPlayer(
@@ -367,25 +372,17 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
                     controller: _controller,
                   ),
                   Positioned.fill(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        return Transform.translate(
-                          offset: const Offset(-100000, -100000),
-                          child: IgnorePointer(
-                            child: SizedBox(
-                              width: constraints.maxWidth,
-                              height: constraints.maxHeight,
-                              child: Align(
-                                alignment: Alignment.topLeft,
-                                child: RepaintBoundary(
-                                  key: _animatedOverlayKey,
-                                  child: widget.animatedOverlay!,
-                                ),
-                              ),
-                            ),
+                    child: Transform.translate(
+                      offset: const Offset(-10000, 0),
+                      child: IgnorePointer(
+                        child: Align(
+                          alignment: Alignment.topLeft,
+                          child: RepaintBoundary(
+                            key: _animatedOverlayKey,
+                            child: widget.animatedOverlay!,
                           ),
-                        );
-                      },
+                        ),
+                      ),
                     ),
                   ),
                 ],
