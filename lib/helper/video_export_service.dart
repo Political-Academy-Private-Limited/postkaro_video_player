@@ -14,6 +14,7 @@ Future<String?> exportVideoWithOverlay({
   GlobalKey? overlayKey1,
   Offset? overlayOffSet1,
   required OverlayAnimationData animationType,
+  Size? animSize,
   String? ttsText,
   void Function(double progress)? onProgress,
 }) async {
@@ -68,6 +69,7 @@ Future<String?> exportVideoWithOverlay({
       overlayWidgetOffSet1: overlayOffSet1,
       overlayWidgetPath1: overlayWidgetPath1,
       animationData: animationType,
+      animSize: animSize,
       audioFilePath: audioFilePath,
       onProgress: onProgress,
     );

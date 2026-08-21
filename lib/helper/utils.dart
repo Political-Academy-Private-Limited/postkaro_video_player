@@ -231,6 +231,7 @@ Future<String?> mergeVideoWithOverlay(
   Offset? overlayWidgetOffSet1,
   String? audioFilePath,
   required OverlayAnimationData animationData,
+  Size? animSize,
   void Function(double progress)? onProgress,
 }) async {
   try {
@@ -245,6 +246,7 @@ Future<String?> mergeVideoWithOverlay(
     if (duration == null) return null;
 
     final int videoWidth = resolution['width']!;
+    final int videoHeight = resolution['height']!;
 
     List<String> inputs = ["-i \"$videoPath\""];
     List<String> filterSteps = [];
@@ -268,11 +270,19 @@ Future<String?> mergeVideoWithOverlay(
       inputIndex++;
     }
 
-    /// Animated overlay (optional)
+    /// Animated overlay — scale to real overlay size so (W-w)*offset works
     String? animLabel;
     if (animatedOverlayPath != null) {
       inputs.add("-loop 1 -t $duration -i \"$animatedOverlayPath\"");
-      filterSteps.add("[$inputIndex:v]scale=$videoWidth:-1[anim]");
+      if (animSize != null) {
+        final aw = (videoWidth * animSize.width).round();
+        final ah = (videoHeight * animSize.height).round();
+        final evenW = aw < 2 ? 2 : aw - (aw % 2);
+        final evenH = ah < 2 ? 2 : ah - (ah % 2);
+        filterSteps.add("[$inputIndex:v]scale=$evenW:$evenH[anim]");
+      } else {
+        filterSteps.add("[$inputIndex:v]scale=$videoWidth:-1[anim]");
+      }
       animLabel = "[anim]";
       inputIndex++;
     }
@@ -317,7 +327,7 @@ Future<String?> mergeVideoWithOverlay(
     if (animLabel != null) {
       final animationExpr = buildCustomAnimation(
         animData: animationData,
-        resolution: resolution,
+        animSize: animSize,
       );
       filterSteps.add("$currentV$animLabel overlay=$animationExpr[v_anim]");
       currentV = "[v_anim]";
@@ -421,26 +431,27 @@ class OverlayPoint {
 ///new logic
 
 String startX(double value) {
-  return "(main_w+overlay_w)*$value-overlay_w";
+  return "(W-w)*$value";
 }
 
 String startY(double value) {
-  return "(main_h+overlay_h)*$value-overlay_h";
+  return "(H-h)*$value";
 }
 
 String endX(double value) {
-  return "(main_w-overlay_w)*$value";
+  return "(W-w)*$value";
 }
 
 String endY(double value) {
-  return "(main_h-overlay_h)*$value";
+  return "(H-h)*$value";
 }
 
 String buildCustomAnimation({
   required OverlayAnimationData animData,
-  required resolution,
+  Size? animSize,
 }) {
-  final start = animData.startOffset;
+  // Start from the original offset, then push outside (same as setOutside).
+  final start = animData.withOutsideStart(animSize).startOffset;
   final end = animData.endOffset;
 
   final startTime = animData.startDuration.inMilliseconds / 1000.0;
@@ -452,31 +463,11 @@ String buildCustomAnimation({
   final ex = endX(end.dx);
   final ey = endY(end.dy);
 
-  final progress = "if(lt(t\\,$startTime)\\,0\\,"
-      "if(gte(t\\,${startTime + duration})\\,1\\,"
-      "(3*((t-$startTime)/$duration)^2-2*((t-$startTime)/$duration)^3)"
+  final p = "((t-$startTime)/$duration)";
+  final progress = "if(lt(t,$startTime),0,"
+      "if(gte(t,${startTime + duration}),1,"
+      "(3*$p*$p-2*$p*$p*$p)"
       "))";
-  return "x=($sx)+(($ex)-($sx))*($progress):"
-      "y=($sy)+(($ey)-($sy))*($progress)";
+  return "x='$sx+($ex-($sx))*($progress)':"
+      "y='$sy+($ey-($sy))*($progress)'";
 }
-// String buildCustomAnimation({
-//   required OverlayAnimationData animData,
-//   required resolution,
-// }) {
-//   final start = animData.startOffset;
-//   log("ddddddd start ${start.dx} and ${start.dy}");
-//   final end = animData.endOffset;
-//   final duration = animData.duration.inMilliseconds / 1000.0;
-//
-//   final progress = "if(lt(t\\,$duration)\\,"
-//       "(3*(t/$duration)*(t/$duration)-2*(t/$duration)*(t/$duration)*(t/$duration))"
-//       "\\,1)";
-//   final sx = startX(start.dx);
-//   final sy = startY(start.dy);
-//
-//   final ex = endX(end.dx);
-//   final ey = endY(end.dy);
-//
-//   return "x=($sx)+(($ex)-($sx))*($progress):"
-//       "y=($sy)+(($ey)-($sy))*($progress)";
-// }

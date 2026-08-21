@@ -85,7 +85,9 @@ class _AnimationWidgetState extends State<AnimationWidget>
   void _onVideoControllerChanged() {
     final videoPlayerController = _lastVideoPlayerController;
     if (videoPlayerController == null ||
-        !videoPlayerController.value.isInitialized) return;
+        !videoPlayerController.value.isInitialized) {
+      return;
+    }
 
     final currentPosition = videoPlayerController.value.position;
     final isPlaying = videoPlayerController.value.isPlaying;

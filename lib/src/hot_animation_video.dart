@@ -14,48 +14,8 @@ class HotAnimationVideo extends StatefulWidget {
 
 class _HotAnimationVideoState extends State<HotAnimationVideo> {
   @override
-  void initState() {
-    super.initState();
-    overlayAnimationData = widget.animData.animationData;
-    setOutside();
-  }
-
-  late OverlayAnimationData? overlayAnimationData;
-
-  void setOutside() {
-    final data = overlayAnimationData;
-    final size = widget.animSize;
-
-    if (data == null || size == null) {
-      return;
-    }
-
-    final offset = data.startOffset;
-
-    double x = offset.dx;
-    double y = offset.dy;
-
-    // X axis
-    if (x <= 0) {
-      x = x - size.width;
-    } else if (x >= 1) {
-      x = x + size.width;
-    }
-
-    // Y axis
-    if (y <= 0) {
-      y = y - size.height;
-    } else if (y >= 1) {
-      y = y + size.height;
-    }
-
-    overlayAnimationData = data.copyWith(
-      startOffset: Offset(x, y),
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Keep original startOffset; outside push is applied in preview + export.
     return HotVideoPlayerOverlay(
       url: widget.animData.url,
       controller: widget.animData.controller,
@@ -81,7 +41,8 @@ class _HotAnimationVideoState extends State<HotAnimationVideo> {
       overlayPosition: widget.animData.overlayPosition,
       overlayWidget1: widget.animData.overlayWidget1,
       overlayPosition1: widget.animData.overlayPosition1,
-      animationData: overlayAnimationData,
+      animSize: widget.animSize,
+      animationData: widget.animData.animationData,
       shareDownloadProgressIndicator:
           widget.animData.shareDownloadProgressIndicator,
       downloadWithOverlay: widget.animData.downloadWithOverlay,

@@ -114,6 +114,9 @@ class HotVideoPlayerOverlay extends StatefulWidget {
   /// Defines starting/ending offsets and durations.
   final OverlayAnimationData? animationData;
 
+  /// Normalized overlay size (0–1) relative to the video frame.
+  final Size? animSize;
+
   /// Custom progress indicator shown during video processing.
   /// Defaults to a centered `CircularProgressIndicator`.
   final Widget? shareDownloadProgressIndicator;
@@ -169,6 +172,7 @@ class HotVideoPlayerOverlay extends StatefulWidget {
     this.shareBackgroundColor,
     this.animatedOverlay,
     this.animationData,
+    this.animSize,
     this.shareDownloadProgressIndicator,
     this.downloadWithOverlay = false,
     this.onStatusChanged,
@@ -246,6 +250,7 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
       animatedOverlayKey:
           widget.animatedOverlay == null ? null : _animatedOverlayKey,
       animationType: widget.animationData ?? _defaultAnimationData,
+      animSize: widget.animSize,
       ttsText: widget.ttsText,
       onProgress: (progress) {
         if (mounted) {
@@ -356,30 +361,31 @@ class _HotVideoPlayerOverlayState extends State<HotVideoPlayerOverlay> {
                   ),
                 if (widget.animatedOverlay != null && !isVideoLoading) ...[
                   AnimationWidget(
-                    animationType:
-                        widget.animationData ?? _defaultAnimationData,
+                    animationType: (widget.animationData ?? _defaultAnimationData)
+                        .withOutsideStart(widget.animSize),
                     animatedOverlay: widget.animatedOverlay!,
                     controller: _controller,
                   ),
-                  Transform.translate(
-                    offset: const Offset(-100000, -100000),
-                    child: IgnorePointer(
-                      child: RepaintBoundary(
-                        key: _animatedOverlayKey,
-                        child: AnimationWidget(
-                          animationType: OverlayAnimationData(
-                            startOffset:
-                                (widget.animationData ?? _defaultAnimationData)
-                                    .endOffset,
-                            endOffset:
-                                (widget.animationData ?? _defaultAnimationData)
-                                    .endOffset,
-                            duration: Duration.zero,
-                            startDuration: Duration.zero,
+                  Positioned.fill(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Transform.translate(
+                          offset: const Offset(-100000, -100000),
+                          child: IgnorePointer(
+                            child: SizedBox(
+                              width: constraints.maxWidth,
+                              height: constraints.maxHeight,
+                              child: Align(
+                                alignment: Alignment.topLeft,
+                                child: RepaintBoundary(
+                                  key: _animatedOverlayKey,
+                                  child: widget.animatedOverlay!,
+                                ),
+                              ),
+                            ),
                           ),
-                          animatedOverlay: widget.animatedOverlay!,
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ),
                 ],

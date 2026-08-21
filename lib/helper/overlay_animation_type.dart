@@ -31,4 +31,26 @@ class OverlayAnimationData {
       startDuration: startDuration ?? this.startDuration,
     );
   }
+
+  /// Pushes [startOffset] fully outside the frame using [animSize] (0–1).
+  OverlayAnimationData withOutsideStart(Size? animSize) {
+    if (animSize == null) return this;
+
+    double x = startOffset.dx;
+    double y = startOffset.dy;
+
+    if (x <= 0) {
+      x = x - animSize.width;
+    } else if (x >= 1) {
+      x = x + animSize.width;
+    }
+
+    if (y <= 0) {
+      y = y - animSize.height;
+    } else if (y >= 1) {
+      y = y + animSize.height;
+    }
+
+    return copyWith(startOffset: Offset(x, y));
+  }
 }
